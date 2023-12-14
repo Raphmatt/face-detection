@@ -1,8 +1,9 @@
 from fastapi import APIRouter
 from fastapi import UploadFile, File
 
-router = APIRouter()
+from src import service
 
+router = APIRouter()
 
 @router.get("/heartbeat")
 async def heartbeat():
@@ -10,6 +11,5 @@ async def heartbeat():
 
 
 @router.post("/image/process")
-async def create_upload_file(file: UploadFile = File(...)):
-    return False
-    # return {"item_id": image_id, "file_info": file.filename}
+async def process_image(file: UploadFile = File(...)):
+    return service.process_image(file)
