@@ -8,7 +8,7 @@ from fastapi import UploadFile, File
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 
-from utils.convert import convert_to_rgb
+from src.utils.convert import rgba2rgb
 
 
 async def read_image_file(file: UploadFile = File(...)) -> np.ndarray:
@@ -34,7 +34,7 @@ async def read_image_file(file: UploadFile = File(...)) -> np.ndarray:
 
 async def process_image(file: UploadFile = File(...)) -> np.ndarray:
     np_image = await read_image_file(file)
-    np_image = convert_to_rgb(np_image)
+    np_image = rgba2rgb(np_image)
 
     if detect_face_count(np_image) == 1:
         return np_image
