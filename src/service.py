@@ -39,11 +39,11 @@ async def process_image(file: UploadFile = File(...)) -> np.ndarray:
     if detect_face_count(np_image) == 1:
         return np_image
 
-    return False
+    return np.array([])
     pass
 
 
-def detect_face_count(mp_image: mp.Image) -> int:
+def detect_face_count(mp_image: np.ndarray) -> int:
     # Implement face recognition logic
 
     # STEP 1: Create an FaceDetector object.
@@ -57,7 +57,8 @@ def detect_face_count(mp_image: mp.Image) -> int:
     detector = vision.FaceDetector.create_from_options(options)
 
     # STEP 2: Detect faces in the input image.
-    detection_result = detector.detect(mp_image)
+    # noinspection PyTypeChecker
+    detection_result = detector.detect(mp_image)  # type: mp.Image
 
     # STEP 3: Count the number of faces detected.
     face_count = len(detection_result.detections)
