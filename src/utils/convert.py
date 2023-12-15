@@ -3,18 +3,6 @@ import numpy as np
 import mediapipe as mp
 
 
-def convert_to_opencv_image(numpy_image: np.ndarray) -> np.ndarray:
-    """
-    Convert a numpy array to an OpenCV image
-    :param numpy_image: The numpy array to convert
-    :return: The OpenCV image
-    """
-    # Convert to OpenCV image format if needed
-    # (Assuming the input is already in RGB format)
-    opencv_image = numpy_image.copy()
-    return opencv_image
-
-
 def convert_to_mp_image(numpy_image: np.ndarray) -> mp.Image:
     """
     Convert a numpy array to a MediaPipe image
@@ -26,11 +14,11 @@ def convert_to_mp_image(numpy_image: np.ndarray) -> mp.Image:
     return mp_image
 
 
-def convert_to_rgb(numpy_image: np.ndarray) -> np.ndarray:
+def rgba2rgb(numpy_image: np.ndarray) -> np.ndarray:
     """
-    Convert a numpy image to RGB format
-    :param numpy_image: The numpy image to convert
-    :return: The converted numpy image
+    Convert an RGBA numpy image to an RGB numpy image
+    :param numpy_image: The RGBA numpy image
+    :return: The RGB numpy image
     """
     # If the image has 4 channels (e.g., RGBA), convert to 3 channels (RGB)
     if numpy_image.shape[-1] == 4:
