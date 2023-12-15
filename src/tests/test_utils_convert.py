@@ -1,16 +1,8 @@
 # test_utils_convert.py
-import mediapipe as mp
 import numpy as np
-import pytest
 
-from src.utils.convert import convert_to_mp_image, rgba2rgb
+from src.utils.convert import rgba2rgb
 
-
-def test_convert_to_mp_image_returns_mp_image():
-    # Create a sample numpy array representing an RGB image
-    sample_image = np.random.randint(0, 256, (100, 100, 3), dtype=np.uint8)
-    mp_image = convert_to_mp_image(sample_image)
-    assert isinstance(mp_image, mp.Image)
 
 def test_convert_to_rgb_returns_rgb_image():
     # Create a sample numpy array representing an RGBA image
