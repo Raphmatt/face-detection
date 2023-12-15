@@ -3,7 +3,7 @@
 import mediapipe as mp
 import pytest
 
-from src.service import detect_face_count
+from service import detect_face_count
 
 testdata_detect_face_count = [
     ("testdata/one_face.jpg", 1),
