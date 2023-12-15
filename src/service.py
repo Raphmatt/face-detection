@@ -8,7 +8,7 @@ from fastapi import UploadFile, File
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 
-from src.utils.convert import convert_to_rgb
+from utils.convert import convert_to_rgb
 
 
 async def read_image_file(file: UploadFile = File(...)) -> np.ndarray:
