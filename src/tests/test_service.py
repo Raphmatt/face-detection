@@ -1,14 +1,19 @@
 # test_service.py
+import os
 
+import cv2
 import mediapipe as mp
 import pytest
 
-from service import detect_face_count
+from src.service import detect_face_count
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+testdata_path = os.path.join(current_dir, "testdata")
 
 testdata_detect_face_count = [
-    ("testdata/one_face.jpg", 1),
-    ("testdata/two_faces.jpg", 2),
-    ("testdata/no_face.jpg", 0),
+    (os.path.join(testdata_path, "one_face.jpg"), 1),
+    (os.path.join(testdata_path, "two_faces.jpg"), 2),
+    (os.path.join(testdata_path, "no_face.jpg"), 0),
 ]
 
 
