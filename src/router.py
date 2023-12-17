@@ -5,6 +5,7 @@ from src import service
 
 router = APIRouter()
 
+
 @router.get("/heartbeat")
 async def heartbeat():
     return {"status": "ok"}
