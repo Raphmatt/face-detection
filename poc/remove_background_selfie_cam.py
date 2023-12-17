@@ -7,7 +7,7 @@ mp_drawing = mp.solutions.drawing_utils
 mp_selfie_segmentation = mp.solutions.selfie_segmentation
 
 BG_COLOR = (0, 255, 196)
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 prevTime = 0
 
 with mp_selfie_segmentation.SelfieSegmentation(model_selection = 0) as selfie_segmentation:
@@ -27,7 +27,7 @@ with mp_selfie_segmentation.SelfieSegmentation(model_selection = 0) as selfie_se
         # Bilateral Filter numpy
         condition = np.stack((results.segmentation_mask,) * 3, axis = -1) > 0.1
 
-        # Apply some background magicp
+        # Apply some background magic
         bg_image = cv2.imread('background/1.png')
         #bg_image = cv2.GaussianBlur(image, (55, 55), 0)
 
