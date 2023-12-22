@@ -1,3 +1,4 @@
+import os
 import time
 
 import cv2
@@ -13,7 +14,13 @@ mp_face_mesh = mp.solutions.face_mesh
 mp_drawing = mp.solutions.drawing_utils
 
 BG_COLOR = (0, 255, 196)
-MODEL = "/Users/raphael/Downloads/selfie_multiclass_256x256.tflite"
+MODEL = os.path.join(
+    os.path.dirname(__file__),
+    "../src/mp_models/segmentation/selfie_multiclass_256x256.tflite")
+#
+# model_asset_path = os.path.join(
+#     os.path.dirname(__file__),
+#     'mp_models/face_detection/blaze_face_short_range.tflite'))
 
 cap = cv2.VideoCapture(0)
 prevTime = 0
