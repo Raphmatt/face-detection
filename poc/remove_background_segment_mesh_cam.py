@@ -17,6 +17,10 @@ BG_COLOR = (0, 255, 196)
 MODEL = os.path.join(
     os.path.dirname(__file__),
     "../src/mp_models/segmentation/selfie_multiclass_256x256.tflite")
+
+with open(MODEL, 'rb') as f:
+    model = f.read()
+
 #
 # model_asset_path = os.path.join(
 #     os.path.dirname(__file__),
@@ -26,7 +30,7 @@ cap = cv2.VideoCapture(0)
 prevTime = 0
 
 # Create the options that will be used for ImageSegmenter
-base_options_segmenter = python.BaseOptions(model_asset_path=MODEL)
+base_options_segmenter = python.BaseOptions(model_asset_buffer=model)
 options_segmenter = vision.ImageSegmenterOptions(base_options=base_options_segmenter,
                                                  output_category_mask=True)
 
@@ -35,7 +39,7 @@ with mp_face_mesh.FaceMesh(
         max_num_faces=1,
         min_detection_confidence=0.5,
         min_tracking_confidence=0.5) as face_mesh:
-    with python.vision.ImageSegmenter.create_from_options(options_segmenter) as segmenter:
+    with vision.ImageSegmenter.create_from_options(options_segmenter) as segmenter:
         bg_image = None
 
         while cap.isOpened():
