@@ -1,3 +1,4 @@
+import os
 import time
 
 import cv2
@@ -13,13 +14,20 @@ mp_face_mesh = mp.solutions.face_mesh
 mp_drawing = mp.solutions.drawing_utils
 
 BG_COLOR = (0, 255, 196)
-MODEL = "/Users/raphael/Downloads/selfie_multiclass_256x256.tflite"
+
+MODEL = os.path.join(
+    os.path.dirname(__file__),
+    "../src/mp_models/segmentation/selfie_multiclass_256x256.tflite")
+
+with open(MODEL, 'rb') as f:
+    model = f.read()
+
 
 cap = cv2.VideoCapture(1)
 prevTime = 0
 
 # Create the options that will be used for ImageSegmenter
-base_options_segmenter = python.BaseOptions(model_asset_path=MODEL)
+base_options_segmenter = python.BaseOptions(model_asset_buffer=model)
 options_segmenter = vision.ImageSegmenterOptions(base_options=base_options_segmenter,
                                                  output_category_mask=True)
 
