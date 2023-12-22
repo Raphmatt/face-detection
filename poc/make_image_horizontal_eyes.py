@@ -1,3 +1,4 @@
+import os
 import time
 
 import cv2
@@ -13,13 +14,19 @@ mp_face_mesh = mp.solutions.face_mesh
 mp_drawing = mp.solutions.drawing_utils
 
 BG_COLOR = (0, 255, 196)
-MODEL = "/Users/raphael/Downloads/selfie_multiclass_256x256.tflite"
+
+MODEL = os.path.join(
+    os.path.dirname(__file__),
+    "../src/mp_models/segmentation/selfie_multiclass_256x256.tflite")
+
+with open(MODEL, 'rb') as f:
+    model = f.read()
 
 cap = cv2.VideoCapture(0)
 prevTime = 0
 
 # Create the options that will be used for ImageSegmenter
-base_options_segmenter = python.BaseOptions(model_asset_path=MODEL)
+base_options_segmenter = python.BaseOptions(model_asset_buffer=model)
 options_segmenter = vision.ImageSegmenterOptions(base_options=base_options_segmenter,
                                                  output_category_mask=True)
 
@@ -36,6 +43,10 @@ with mp_face_mesh.FaceMesh(
             if not success:
                 print("Ignoring empty camera frame.")
                 continue
+
+            # image = cv2.imread(
+            #     "/src/tests/testdata/angled_face_1.jpg")
+
 
             # Convert the BGR image to RGB (if your model expects RGB input)
             image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -87,6 +98,7 @@ with mp_face_mesh.FaceMesh(
                     dy = right_eye_point[1] - left_eye_point[1]
                     dx = right_eye_point[0] - left_eye_point[0]
                     angle = np.degrees(np.arctan2(dy, dx))
+                    print(angle)
 
                     # Calculate the center for rotation
                     center = (
@@ -114,5 +126,6 @@ with mp_face_mesh.FaceMesh(
             cv2.putText(output_image_bgr, f'fps: {int(fps)}', (20, 70), cv2.FONT_HERSHEY_PLAIN, 3, (0, 0, 0), 2)
 
             cv2.imshow('DIY Background removal', output_image_bgr)
+            # cv2.waitKey(0)
             if cv2.waitKey(5) & 0xFF == 27:  # Exit on pressing ESC
                 break
