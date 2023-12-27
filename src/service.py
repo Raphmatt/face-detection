@@ -1,6 +1,7 @@
 import io
 import math
 import os
+import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import mediapipe as mp
@@ -98,35 +99,60 @@ def shoulder_angle_valid(mp_image: mp.Image) -> bool:
     else:
         return False
 
-    # Calculate the angle
-    # left_shoulder = np.array([left_shoulder.x, left_shoulder.y])
-    # right_shoulder = np.array([right_shoulder.x, right_shoulder.y])
-    #
-    # # Plot the line connecting the shoulders
-    # plt.plot([left_shoulder[0], right_shoulder[0]], [left_shoulder[1], right_shoulder[1]], label='Shoulder Line')
-    #
-    # # Mark the shoulder points
-    # plt.scatter(left_shoulder[0], left_shoulder[1], color='red', label='Left Shoulder')
-    # plt.scatter(right_shoulder[0], right_shoulder[1], color='blue', label='Right Shoulder')
-    #
-    # # Set plot limits
-    # plt.xlim(-1, 4)
-    # plt.ylim(-1, 5)
-    #
-    # # Add a legend
-    # plt.legend()
-    #
-    # # Add angle information to the plot
-    # plt.text(left_shoulder[0], left_shoulder[1], f'{angle:.2f} degrees', fontsize=10, ha='right', va='bottom')
-    #
-    # # Show the plot
-    # plt.grid(True)
-    # plt.show()
-    #
-    # # Check if the angle is between -10 and 10 degrees
-    # return -10 <= angle <= 10
-
 
 async def process_face(image: np.ndarray) -> np.ndarray:
     # Implement face processing logic
     pass
+
+
+def remove_background(mp_image: mp.Image, background_color=(255, 255, 255)) -> mp.Image:
+    """
+    Remove the background of an image using Mediapipe and replace it with a plain color.
+
+    :param mp_image: The input image with the background to be removed.
+    :param background_color: The color to replace the background with (default is white).
+    :return: The image with the background removed.
+    """
+
+    base_options = python.BaseOptions(
+        model_asset_path=os.path.join(
+            os.path.dirname(__file__),
+            'mp_models/segmentation/square_selfie_segmenter.tflite'))
+    vision_running_mode = mp.tasks.vision.RunningMode
+
+    # Create an image segmenter instance with the image mode:
+    options = vision.ImageSegmenterOptions(
+        base_options=base_options,
+        running_mode=vision_running_mode.IMAGE,
+        output_category_mask=True)
+    segmenter = vision.ImageSegmenter.create_from_options(options)
+
+    image_rgb = cv2.cvtColor(mp_image, cv2.COLOR_BGR2RGB)
+
+    # Segment the image to obtain masks
+    segmented_masks = segmenter.segment(mp_image)
+
+    # Extract the mask from the segmented result
+    category_mask = segmented_masks.category_mask
+
+    # Select only the hair category (usually represented by index 1)
+    person_condition = (category_mask.numpy_view() == 1)
+
+    person_condition_stacked = np.stack((person_condition,) * 3, axis=-1)
+
+    # Convert the mask to a binary image
+    binary_mask = (person_condition > 0).astype(np.uint8)
+
+    # Resize the binary mask to the original image size
+    binary_mask = cv2.resize(binary_mask, (mp_image.width, mp_image.height))
+
+    white_background = np.ones_like(mp_image) * 255
+    # Apply the mask: keep only the hair, make everything else black
+    output_image = np.where(person_condition_stacked, image_rgb, white_background)
+
+    # Convert the RGB image back to BGR
+    output_image_bgr = cv2.cvtColor(output_image, cv2.COLOR_RGB2BGR)
+
+    cv2.imshow('DIY Background removal', output_image_bgr)
+
+    return output_image
