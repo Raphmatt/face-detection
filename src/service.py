@@ -46,27 +46,63 @@ async def process_image(file: UploadFile = File(...)) -> np.ndarray:
     pass
 
 
-def detect_face_count(mp_image: np.ndarray) -> int:
+def detect_face_count(mp_image: mp.Image) -> int:
     # Implement face recognition logic
 
     # STEP 1: Create an FaceDetector object.
     base_options = python.BaseOptions(
         model_asset_path=os.path.join(
             os.path.dirname(__file__),
-            'mp_models/face_detection/blaze_face_short_range.tflite'))
+            'mp_models', 'face_detection', 'blaze_face_short_range.tflite'))
     options = vision.FaceDetectorOptions(
         base_options=base_options,
         min_detection_confidence=0.7)
-    detector = vision.FaceDetector.create_from_options(options)
 
-    # STEP 2: Detect faces in the input image.
-    # noinspection PyTypeChecker
-    detection_result = detector.detect(mp_image)  # type: mp.Image
+    # Using 'with' statement for automatic resource management.
+    with vision.FaceDetector.create_from_options(options) as detector:
 
-    # STEP 3: Count the number of faces detected.
-    face_count = len(detection_result.detections)
+        # STEP 2: Detect faces in the input image.
+        detection_result = detector.detect(mp_image)
 
-    return face_count
+        # STEP 3: Count the number of faces detected.
+        face_count = len(detection_result.detections)
+
+        return face_count
+
+def calculate_face_rotation(mp_image: np.ndarray) -> float:
+    # Initialize the FaceMesh object with a 'with' statement for automatic resource management.
+    with mp.solutions.face_mesh.FaceMesh(
+            static_image_mode=False,
+            max_num_faces=5,
+            min_detection_confidence=0.5) as face_mesh:
+
+        # STEP 2: Detect faces in the input image.
+        face_mesh_results = face_mesh.process(mp_image)
+
+        # STEP 3: Extract landmarks for left and right eyes
+        if face_mesh_results.multi_face_landmarks:
+            for face_landmarks in face_mesh_results.multi_face_landmarks:
+                # Check if there is exactly one face, as intended for rotation calculation.
+                if len(face_mesh_results.multi_face_landmarks) == 1:
+                    # Extract landmarks for left and right eyes
+                    # Assuming landmarks 130 and 359 are the points we are interested in
+                    left_eye = face_landmarks.landmark[130]
+                    right_eye = face_landmarks.landmark[359]
+
+                    # Convert from relative coordinates to image coordinates
+                    left_eye_point = (int(left_eye.x * mp_image.shape[1]), int(left_eye.y * mp_image.shape[0]))
+                    right_eye_point = (int(right_eye.x * mp_image.shape[1]), int(right_eye.y * mp_image.shape[0]))
+
+                    # Calculate the angle
+                    dy = right_eye_point[1] - left_eye_point[1]
+                    dx = right_eye_point[0] - left_eye_point[0]
+
+                    # Store angle in degrees and return
+                    return np.degrees(np.arctan2(dy, dx))
+        # Return None if no faces are detected or there is any other issue.
+        return None
+
+
 
 
 def shoulder_angle_valid(mp_image: mp.Image) -> bool:
