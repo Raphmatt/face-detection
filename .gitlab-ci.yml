@@ -4,12 +4,14 @@ stages:
   - test
 
 before_script:
+  - apt-get update -yqq  # Update the package lists
+  - apt-get install -y libgl1-mesa-glx  # Install OpenGL libraries
   - python --version  # Print out python version for debugging
   - pip install --upgrade pip  # Ensure you have the latest version of pip
-  - pip install -r requirements.txt  # Install dependencies
+  - pip install -r requirements.txt  # Install dependencies from your requirements file
 
 pytest:
   stage: test
   script:
     - pytest  # Run the tests
-  allow_failure: false  # This makes the pipeline fail if the test fails
+  allow_failure: false
