@@ -6,7 +6,7 @@ import mediapipe as mp
 import pytest
 import numpy as np
 
-from src.service import detect_face_count, calculate_face_rotation, get_packground_mask
+from src.service import detect_face_count, calculate_face_rotation, get_background_mask
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 testdata_path = os.path.join(current_dir, "testdata")
@@ -71,7 +71,7 @@ def test_get_background_mask(original_file: str, expected_mask_file: str):
     expected_mask = cv2.imread(expected_mask_path, cv2.IMREAD_GRAYSCALE)
 
     # Run the method to generate the mask of the original image
-    generated_mask = get_packground_mask(image)
+    generated_mask = get_background_mask(image)
 
     # Ensure the generated mask is in grayscale (if it isn't already)
     if len(generated_mask.shape) == 3:  # Checks if image has 3 dimensions
