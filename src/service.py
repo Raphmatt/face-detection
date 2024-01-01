@@ -14,7 +14,7 @@ from numpy import ndarray, dtype
 from src.utils.convert import rgba2rgb
 
 
-async def convert_fastapi_obj_2_numpy_Image(file: UploadFile = File(...)) -> np.ndarray:
+async def convert_fastapi_obj_2_numpy_image(file: UploadFile = File(...)) -> np.ndarray:
     """
     Read an uploaded image file into a numpy array
 
@@ -36,7 +36,7 @@ async def convert_fastapi_obj_2_numpy_Image(file: UploadFile = File(...)) -> np.
 
 
 async def process_image(file: UploadFile = File(...)) -> np.ndarray:
-    np_image = await convert_fastapi_obj_2_numpy_Image(file)
+    np_image = await convert_fastapi_obj_2_numpy_image(file)
     np_image = rgba2rgb(np_image)
 
     if detect_face_count(np_image) == 1:
