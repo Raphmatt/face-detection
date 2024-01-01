@@ -1,18 +1,19 @@
 # test_service.py
 import os
-
 import cv2
 import mediapipe as mp
 import pytest
 import numpy as np
 
-from src.service import detect_face_count, calculate_face_rotation, get_background_mask
+from src.service import detect_face_count, calculate_face_rotation, get_background_mask, shoulder_angle_valid
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 testdata_path = os.path.join(current_dir, "testdata")
 
-def dataPath(filename: str) -> str:
+
+def data_path(filename: str) -> str:
     return os.path.join(testdata_path, filename)
+
 
 testdata_detect_face_count = [
     ("one_face.jpg", 1),
@@ -24,7 +25,7 @@ testdata_detect_face_count = [
 
 @pytest.mark.parametrize("file, expected_face_count", testdata_detect_face_count)
 def test_detect_face_count_returns_count(file: str, expected_face_count: int):
-    filepath = dataPath(file)
+    filepath = data_path(file)
     # image = mp.Image.create_from_file(filepath)
     image = mp.Image(image_format=mp.ImageFormat.SRGB, data=cv2.cvtColor(cv2.imread(filepath), cv2.COLOR_BGR2RGB))
     face_count = detect_face_count(image)
@@ -44,7 +45,7 @@ testdata_detect_face_rotation = [
 
 @pytest.mark.parametrize("file, expected_face_rotation", testdata_detect_face_rotation)
 def test_get_face_angle(file: str, expected_face_rotation: float):
-    filepath = dataPath(file)
+    filepath = data_path(file)
     image = cv2.imread(filepath)
     face_rotation = calculate_face_rotation(image)
     assert face_rotation == pytest.approx(expected_face_rotation, abs=1)
@@ -62,8 +63,8 @@ testdata_get_background_mask = [
 
 @pytest.mark.parametrize("original_file, expected_mask_file", testdata_get_background_mask)
 def test_get_background_mask(original_file: str, expected_mask_file: str):
-    original_img_path = dataPath(original_file)
-    expected_mask_path = dataPath(expected_mask_file)
+    original_img_path = data_path(original_file)
+    expected_mask_path = data_path(expected_mask_file)
 
     # Read the original image and expected mask
     image = mp.Image(image_format=mp.ImageFormat.SRGB,
@@ -86,3 +87,17 @@ def test_get_background_mask(original_file: str, expected_mask_file: str):
 
     # Assert if the difference is more than 20%
     assert percentage_diff <= 5
+
+
+testdata_shoulder_angle_valid = [
+    ("one_face.jpg", True)
+]
+
+
+@pytest.mark.parametrize("file, expected_shoulder_angle", testdata_shoulder_angle_valid)
+def test_shoulder_angle_valid_returns_result(file: str, expected_shoulder_angle: bool):
+    filepath = data_path(file)
+    # image = mp.Image.create_from_file(filepath)
+    image = mp.Image(image_format=mp.ImageFormat.SRGB, data=cv2.cvtColor(cv2.imread(filepath), cv2.COLOR_BGR2RGB))
+    is_shoulder_angle_valid = shoulder_angle_valid(image)
+    assert is_shoulder_angle_valid == expected_shoulder_angle
