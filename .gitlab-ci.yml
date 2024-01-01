@@ -1,0 +1,15 @@
+image: python:3.11  # or any other version of Python you're using
+
+stages:
+  - test
+
+before_script:
+  - python --version  # Print out python version for debugging
+  - pip install --upgrade pip  # Ensure you have the latest version of pip
+  - pip install -r requirements.txt  # Install dependencies
+
+pytest:
+  stage: test
+  script:
+    - pytest  # Run the tests
+  allow_failure: false  # This makes the pipeline fail if the test fails
