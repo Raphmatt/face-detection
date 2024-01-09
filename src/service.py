@@ -3,6 +3,8 @@ import os
 from typing import Any
 
 import math
+
+import cv2
 import mediapipe as mp
 import numpy as np
 from PIL import Image
@@ -46,7 +48,7 @@ async def process_image(file: UploadFile = File(...)) -> np.ndarray:
     pass
 
 
-def detect_face_count(mp_image: mp.Image) -> int:
+def detect_face_count(mp_image: mp.Image):
     """
     Detect the number of faces in an image using Mediapipe.
     :param mp_image: The input image as a MediaPipe Image object.
@@ -70,8 +72,14 @@ def detect_face_count(mp_image: mp.Image) -> int:
 
         # STEP 3: Count the number of faces detected.
         face_count = len(detection_result.detections)
+        face_centers = []
+        for detection in detection_result.detections:
+            bbox = detection.bounding_box
+            cx = int(bbox.origin_x + bbox.width / 2)
+            cy = int(bbox.origin_y + bbox.height / 2)
+            face_centers.append((cx, cy))
 
-        return face_count
+        return face_count, cx, cy
 
 
 def calculate_face_rotation(cv_image: np.ndarray) -> float or None:
@@ -182,3 +190,36 @@ def get_background_mask(mp_image: mp.Image) -> ndarray[Any, dtype[Any]]:
         output_image = np.where(condition, fg_image, bg_image)
 
         return output_image
+
+
+def crop_image(image, cx, cy) -> ndarray:
+    height, width, shape = image.shape
+    # Define crop dimensions
+    crop_width = 250  # TODO: replace with percent
+    crop_height = 500  # TODO: replace with percent
+
+    # Calculate crop region boundaries
+    left = max(0, cx - crop_width)
+    right = min(width, cx + crop_width)
+    top = max(0, cy - crop_height)
+    bottom = min(height, cy + crop_height)
+
+    # Crop the image
+    cropped_image_np = image[top:bottom, left:right]
+
+    return cropped_image_np
+
+
+def resize_image(original_image, target_width=500, target_height=1000):
+
+    # Calculate the scaling factors for width and height
+    width_scale = target_width / original_image.shape[1]
+    height_scale = target_height / original_image.shape[0]
+
+    # Choose the smaller scaling factor to maintain the original aspect ratio
+    scale_factor = min(width_scale, height_scale)
+
+    # Resize the image
+    resized_image = cv2.resize(original_image, None, fx=scale_factor, fy=scale_factor, interpolation=cv2.INTER_AREA)
+
+    return resized_image
