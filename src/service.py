@@ -60,10 +60,14 @@ def detect_face_count(mp_image: mp.Image):
     base_options = python.BaseOptions(
         model_asset_path=os.path.join(
             os.path.dirname(__file__),
-            'mp_models', 'face_detection', 'blaze_face_short_range.tflite'))
+            "mp_models",
+            "face_detection",
+            "blaze_face_short_range.tflite",
+        )
+    )
     options = vision.FaceDetectorOptions(
-        base_options=base_options,
-        min_detection_confidence=0.7)
+        base_options=base_options, min_detection_confidence=0.7
+    )
 
     # Using 'with' statement for automatic resource management.
     with vision.FaceDetector.create_from_options(options) as detector:
@@ -90,10 +94,8 @@ def calculate_face_rotation(cv_image: np.ndarray) -> float or None:
     """
     # Initialize the FaceMesh object with a 'with' statement for automatic resource management.
     with mp.solutions.face_mesh.FaceMesh(
-            static_image_mode=False,
-            max_num_faces=5,
-            min_detection_confidence=0.5) as face_mesh:
-
+        static_image_mode=False, max_num_faces=5, min_detection_confidence=0.5
+    ) as face_mesh:
         # STEP 2: Detect faces in the input image.
         face_mesh_results = face_mesh.process(cv_image)
 
@@ -108,8 +110,14 @@ def calculate_face_rotation(cv_image: np.ndarray) -> float or None:
                     right_eye = face_landmarks.landmark[359]
 
                     # Convert from relative coordinates to image coordinates
-                    left_eye_point = (int(left_eye.x * cv_image.shape[1]), int(left_eye.y * cv_image.shape[0]))
-                    right_eye_point = (int(right_eye.x * cv_image.shape[1]), int(right_eye.y * cv_image.shape[0]))
+                    left_eye_point = (
+                        int(left_eye.x * cv_image.shape[1]),
+                        int(left_eye.y * cv_image.shape[0]),
+                    )
+                    right_eye_point = (
+                        int(right_eye.x * cv_image.shape[1]),
+                        int(right_eye.y * cv_image.shape[0]),
+                    )
 
                     # Calculate the angle
                     dy = right_eye_point[1] - left_eye_point[1]
@@ -129,10 +137,14 @@ def shoulder_angle_valid(mp_image: mp.Image) -> bool:
     base_options = python.BaseOptions(
         model_asset_path=os.path.join(
             os.path.dirname(__file__),
-            'mp_models', 'pose_detection', 'pose_landmarker_lite.task'))
+            "mp_models",
+            "pose_detection",
+            "pose_landmarker_lite.task",
+        )
+    )
     options = vision.PoseLandmarkerOptions(
-        base_options=base_options,
-        min_pose_detection_confidence=0.5)
+        base_options=base_options, min_pose_detection_confidence=0.5
+    )
     detector = vision.PoseLandmarker.create_from_options(options)
 
     pose_result = detector.detect(mp_image)
@@ -145,7 +157,9 @@ def shoulder_angle_valid(mp_image: mp.Image) -> bool:
     left_shoulder = pose_result.pose_landmarks[0][11]
     right_shoulder = pose_result.pose_landmarks[0][12]
 
-    angle_radians = math.atan2(abs(right_shoulder.y - left_shoulder.y), abs(right_shoulder.x - left_shoulder.x))
+    angle_radians = math.atan2(
+        abs(right_shoulder.y - left_shoulder.y), abs(right_shoulder.x - left_shoulder.x)
+    )
     angle_degrees = math.degrees(angle_radians)
 
     if angle_degrees < threshold_angle:
@@ -164,12 +178,16 @@ def get_background_mask(mp_image: mp.Image) -> ndarray[Any, dtype[Any]]:
     base_options = python.BaseOptions(
         model_asset_path=os.path.join(
             os.path.dirname(__file__),
-            'mp_models', 'segmentation', 'square_selfie_segmenter.tflite'))
+            "mp_models",
+            "segmentation",
+            "square_selfie_segmenter.tflite",
+        )
+    )
 
     # Create an image segmenter instance with the image mode:
     options = vision.ImageSegmenterOptions(
-        base_options=base_options,
-        output_category_mask=True)
+        base_options=base_options, output_category_mask=True
+    )
 
     with vision.ImageSegmenter.create_from_options(options) as segmenter:
         person_color = (0, 0, 0)
@@ -211,7 +229,6 @@ def crop_image(image, cx, cy) -> ndarray:
 
 
 def resize_image(original_image, target_width=500, target_height=1000):
-
     # Calculate the scaling factors for width and height
     width_scale = target_width / original_image.shape[1]
     height_scale = target_height / original_image.shape[0]
@@ -220,6 +237,29 @@ def resize_image(original_image, target_width=500, target_height=1000):
     scale_factor = min(width_scale, height_scale)
 
     # Resize the image
-    resized_image = cv2.resize(original_image, None, fx=scale_factor, fy=scale_factor, interpolation=cv2.INTER_AREA)
+    resized_image = cv2.resize(
+        original_image,
+        None,
+        fx=scale_factor,
+        fy=scale_factor,
+        interpolation=cv2.INTER_AREA,
+    )
 
     return resized_image
+
+
+def detect_occlusion(image_np):
+    mp_face_detection = mp.solutions.face_detection
+    face_detection = mp_face_detection.FaceDetection()
+
+    image_rgb = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
+    result = face_detection.process(image_rgb)
+
+    if result.detections:
+        for detection in result.detections:
+            if detection.location_data.relative_bounding_box.ymin < 0.2:
+                return "Face covered by an object"
+            else:
+                return "Face not covered by an object"
+    else:
+        return "No face detected"
