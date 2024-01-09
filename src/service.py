@@ -258,8 +258,8 @@ def detect_occlusion(image_np):
     if result.detections:
         for detection in result.detections:
             if detection.location_data.relative_bounding_box.ymin < 0.2:
-                return "Face covered by an object"
+                return False
             else:
-                return "Face not covered by an object"
+                return True
     else:
-        return "No face detected"
+        return False
