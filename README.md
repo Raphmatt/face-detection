@@ -14,8 +14,8 @@
         - [x] Detect face angle
         - [ ] Adjust face angle / threshold for face angle
       - [ ] Shoulder angle
-        - [ ] Detect shoulder angle
-        - [ ] threshold for shoulder angle
+        - [x] Detect shoulder angle
+        - [x] threshold for shoulder angle
       - [ ] Face visible from the front
         - [ ] Detect face horizontal angle
         - [ ] threshold for face horizontal angle
@@ -27,13 +27,13 @@
         - [ ] Remove background
       - [ ] Uniform cropping to the face
         - [ ] Detect face position
-        - [ ] Crop image to face position
+        - [x] Crop image to face position
         - [ ] Resize image to uniform size
         - [ ] Rotate image to uniform angle
       - [ ] Uniform aspect ratio
         - [ ] Apply uniform aspect ratio
       - [ ] Constant, absolute dimensions (e.g. 500x500px)
-        - [ ] Scale image to constant, absolute dimensions
+        - [x] Scale image to constant, absolute dimensions
 
 
 # Requirements:
@@ -47,7 +47,8 @@
   - Remove the background, so that the person is shown in front of a transparent background.
   - Uniform cropping of the image, so that all faces are shown in the same size, orientation and position.
   - The resulting image should be saved in a uniform aspect ratio with constant, absolute dimensions.
-
+- Additional
+  - Is the person a celebrity?
 
 ## Original Requirements
 
