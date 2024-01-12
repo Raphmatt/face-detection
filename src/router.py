@@ -13,4 +13,7 @@ async def heartbeat():
 
 @router.post("/image/process")
 async def process_image(file: UploadFile = File(...)):
-    return service.process_image(file)
+    try:
+        return service.process_image(file)
+    except Exception as e:
+        return {"error": str(e)}
