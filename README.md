@@ -20,7 +20,7 @@
         - [ ] Detect face horizontal angle
         - [ ] threshold for face horizontal angle
       - [ ] Face not occluded by an object
-        - [ ] Detect occlusion
+        - [x] Detect occlusion
     - [ ] Image optimization
       - [ ] Remove background
         - [x] Get mask of background
