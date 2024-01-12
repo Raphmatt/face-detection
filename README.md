@@ -16,7 +16,7 @@
       - [ ] Shoulder angle
         - [x] Detect shoulder angle
         - [x] threshold for shoulder angle
-      - [ ] Face visible from the front
+      - [ ] Face visible from the front (WIP Pacal)
         - [ ] Detect face horizontal angle
         - [ ] threshold for face horizontal angle
       - [ ] Face not occluded by an object
@@ -25,14 +25,14 @@
       - [ ] Remove background
         - [x] Get mask of background
         - [ ] Remove background
-      - [ ] Uniform cropping to the face
+      - [ ] Uniform cropping to the face (WIP Raphael)
         - [ ] Detect face position
         - [x] Crop image to face position
         - [ ] Resize image to uniform size
         - [ ] Rotate image to uniform angle
-      - [ ] Uniform aspect ratio
+      - [ ] Uniform aspect ratio (WIP Raphael)
         - [ ] Apply uniform aspect ratio
-      - [ ] Constant, absolute dimensions (e.g. 500x500px)
+      - [ ] Constant, absolute dimensions (e.g. 500x500px) 
         - [x] Scale image to constant, absolute dimensions
 
 
