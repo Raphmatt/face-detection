@@ -19,8 +19,8 @@
       - [ ] Face visible from the front (WIP Pacal)
         - [ ] Detect face horizontal angle
         - [ ] threshold for face horizontal angle
-      - [ ] Face not occluded by an object
-        - [x] Detect occlusion
+      - [ ] Face not occluded by an object (Tricky task, tried with facemesh, but occlusion cannot be detected)
+        - [ ] Detect occlusion
     - [ ] Image optimization
       - [ ] Remove background
         - [x] Get mask of background
