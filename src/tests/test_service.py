@@ -5,7 +5,8 @@ import mediapipe as mp
 import pytest
 import numpy as np
 
-from src.service import detect_face_count, calculate_face_rotation, get_background_mask, shoulder_angle_valid
+from src.face_utilities import get_face_count, get_binary_mask, get_face_details
+from src.service import shoulder_angle_valid
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 testdata_path = os.path.join(current_dir, "testdata")
@@ -28,7 +29,7 @@ def test_detect_face_count_returns_count(file: str, expected_face_count: int):
     filepath = data_path(file)
     # image = mp.Image.create_from_file(filepath)
     image = mp.Image(image_format=mp.ImageFormat.SRGB, data=cv2.cvtColor(cv2.imread(filepath), cv2.COLOR_BGR2RGB))
-    face_count = detect_face_count(image)
+    face_count, _ = get_face_count(image)
     assert face_count == expected_face_count
 
 
@@ -47,7 +48,7 @@ testdata_detect_face_rotation = [
 def test_get_face_angle(file: str, expected_face_rotation: float):
     filepath = data_path(file)
     image = cv2.imread(filepath)
-    face_rotation = calculate_face_rotation(image)
+    face_rotation, _, _ = get_face_details(image)
     assert face_rotation == pytest.approx(expected_face_rotation, abs=1)
 
 
@@ -72,7 +73,7 @@ def test_get_background_mask(original_file: str, expected_mask_file: str):
     expected_mask = cv2.imread(expected_mask_path, cv2.IMREAD_GRAYSCALE)
 
     # Run the method to generate the mask of the original image
-    generated_mask = get_background_mask(image)
+    generated_mask = get_binary_mask(image)
 
     # Ensure the generated mask is in grayscale (if it isn't already)
     if len(generated_mask.shape) == 3:  # Checks if image has 3 dimensions

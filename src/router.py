@@ -5,7 +5,7 @@ from io import BytesIO
 import numpy as np
 from fastapi.responses import StreamingResponse
 
-from src import service
+import service
 
 router = APIRouter()
 

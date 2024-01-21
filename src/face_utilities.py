@@ -8,7 +8,7 @@ from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 from numpy import ndarray, dtype
 
-from src.face_aligner import FaceAligner
+from face_aligner import FaceAligner
 
 
 def align_face(cv_image: np.ndarray) -> np.ndarray:
