@@ -1,22 +1,16 @@
-import io
-import os
-from typing import Any
-
-import cv2
 import math
+import os
 
 import cv2
 import mediapipe as mp
 import numpy as np
-from PIL import Image
 from fastapi import UploadFile, File
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
-from numpy import ndarray, dtype
+from numpy import ndarray
 
-from src.face_utilities import get_face_count, align_face
-from src.image_utilities import uploadFile_2_np_image
-from src.face_aligner import FaceAligner
+from face_utilities import get_face_count, align_face
+from image_utilities import uploadFile_2_np_image
 
 
 async def process_image(file: UploadFile = File(...)) -> np.ndarray:
