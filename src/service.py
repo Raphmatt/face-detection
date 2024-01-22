@@ -1,9 +1,11 @@
+import io
 import math
 import os
 
 import cv2
 import mediapipe as mp
 import numpy as np
+from PIL.Image import Image
 from fastapi import UploadFile, File
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
@@ -27,6 +29,55 @@ async def process_image(file: UploadFile = File(...)) -> np.ndarray:
     final_image = align_face(np_image)
 
     return final_image
+
+
+def face_angle_valid(image: mp.Image) -> bool:
+    threshold_angle = 6
+    mp_face_mesh = mp.solutions.face_mesh
+    face_mesh = mp_face_mesh.FaceMesh(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+
+    img_h = image.height
+    img_w = image.width
+    face_3d = []
+    face_2d = []
+
+    np_array = image.numpy_view()
+
+    results = face_mesh.process(np_array)
+
+
+    if results.multi_face_landmarks:
+        for face_landmarks in results.multi_face_landmarks:
+            for idx, lm in enumerate(face_landmarks.landmark):
+                if idx == 33 or idx == 263 or idx == 1 or idx == 61 or idx == 291 or idx == 199:
+                    x, y = int(lm.x * img_w), int(lm.y * img_h)
+
+                    face_2d.append([x, y])
+                    face_3d.append([x, y, lm.z])
+
+            face_2d = np.array(face_2d, dtype=np.float64)
+            face_3d = np.array(face_3d, dtype=np.float64)
+
+            focal_length = 1 * img_w
+
+            cam_matrix = np.array([[focal_length, 0, img_h / 2],
+                                   [0, focal_length, img_w / 2],
+                                   [0, 0, 1]])
+
+            dist_matrix = np.zeros((4, 1), dtype=np.float64)
+            success, rot_vec, trans_vec = cv2.solvePnP(face_3d, face_2d, cam_matrix, dist_matrix)
+            rmat, jac = cv2.Rodrigues(rot_vec)
+            angles, mtxR, mtxQ, Qx, Qy, Qz = cv2.RQDecomp3x3(rmat)
+
+            x = angles[0] * 360
+            y = angles[1] * 360
+
+            if x > threshold_angle or x < -threshold_angle:
+                return False
+            elif y > threshold_angle or y < -threshold_angle:
+                return False
+
+    return True
 
 
 def shoulder_angle_valid(mp_image: mp.Image) -> bool:
