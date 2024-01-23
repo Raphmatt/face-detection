@@ -2,46 +2,70 @@ import cv2
 import mediapipe as mp
 import numpy as np
 
-def detect_occlusion(image_np):
-    mp_face_detection = mp.solutions.face_detection
-    face_detection = mp_face_detection.FaceDetection()
+mp_face_mesh = mp.solutions.face_mesh
 
-    image_rgb = cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB)
-    result = face_detection.process(image_rgb)
+# Function to detect occlusion based on visibility of landmarks
+def detect_occlusion(face_landmarks):
+    # Define indexes of landmarks for eyes and lips
+    left_eye_indices = list(range(362, 382))
+    right_eye_indices = list(range(133, 153))
+    lips_indices = list(range(78, 95)) + list(range(308, 324))
 
-    if result.detections:
-        for detection in result.detections:
-            if detection.location_data.relative_bounding_box.ymin < 0.2:
-                return "Face covered by an object"
-            else:
-                return "Face not covered by an object"
-    else:
-        return "No face detected"
+    # Combine indices for easier processing
+    combined_indices = left_eye_indices + right_eye_indices + lips_indices
 
-# Initialisiere die Kamera
-cap = cv2.VideoCapture(0)
+    # Count how many landmarks are not visible
+    not_visible_count = sum(1 for idx in combined_indices if face_landmarks.landmark[idx].visibility < 0.5)
 
-if not cap.isOpened():
-    print("Error: Could not open camera.")
-    exit()
+    # Heuristic: if a significant number of landmarks are not visible, assume occlusion
+    return not_visible_count > len(combined_indices) * 0.1  # Adjust the ratio as needed
 
-while True:
-    ret, frame = cap.read()
-    if not ret:
-        print("Error: Failed to grab frame.")
-        break
+# Initialize face mesh
+with mp_face_mesh.FaceMesh(min_detection_confidence=0.5, min_tracking_confidence=0.5) as face_mesh:
+    cap = cv2.VideoCapture(0)
 
-    # Rufe die Methode auf
-    message = detect_occlusion(frame)
+    while cap.isOpened():
+        success, image = cap.read()
+        if not success:
+            print("Ignoring empty camera frame.")
+            continue
 
-    # Zeige das Bild und die Nachricht an
-    cv2.putText(frame, message, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-    cv2.imshow('Object Occlusion Detection', frame)
+        # Flip the image horizontally for a later selfie-view display
+        image = cv2.flip(image, 1)
 
-    # Beende die Schleife bei Betätigen der 'q'-Taste
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+        # Convert the BGR image to RGB
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-# Freigabe der Ressourcen
+        # Process the image and detect faces
+        results = face_mesh.process(image)
+
+        # Draw the face mesh annotations on the image
+        image.flags.writeable = True
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
+        occlusion_detected = False
+        if results.multi_face_landmarks:
+            for face_landmarks in results.multi_face_landmarks:
+                # Draw landmarks for visualization
+                mp.solutions.drawing_utils.draw_landmarks(
+                    image=image,
+                    landmark_list=face_landmarks,
+                    connections=mp_face_mesh.FACEMESH_TESSELATION,
+                    landmark_drawing_spec=mp.solutions.drawing_utils.DrawingSpec(color=(0, 255, 0), thickness=1, circle_radius=1)
+                )
+
+                # Check for occlusion
+                if detect_occlusion(face_landmarks):
+                    occlusion_detected = True
+                    break  # If occlusion is detected, no need to check further
+
+        print("No Occlusion Detected" if occlusion_detected else "Occlusion Detected")
+
+        # Display the image
+        cv2.imshow('MediaPipe FaceMesh', image)
+
+        if cv2.waitKey(5) & 0xFF == 27:
+            break
+
 cap.release()
 cv2.destroyAllWindows()
