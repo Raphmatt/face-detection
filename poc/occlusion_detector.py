@@ -1,71 +1,84 @@
 import cv2
-import mediapipe as mp
+import dlib
 import numpy as np
 
-mp_face_mesh = mp.solutions.face_mesh
+# Laden des Haar-Kaskaden-Klassifikators für die Gesichtserkennung
+face_cascade = cv2.CascadeClassifier(
+    cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+)
 
-# Function to detect occlusion based on visibility of landmarks
-def detect_occlusion(face_landmarks):
-    # Define indexes of landmarks for eyes and lips
-    left_eye_indices = list(range(362, 382))
-    right_eye_indices = list(range(133, 153))
-    lips_indices = list(range(78, 95)) + list(range(308, 324))
+# Laden des Dlib Shape Predictors
+predictor_path = "shape_predictor_68_face_landmarks.dat"  # Pfad zum Dlib-Modell
+predictor = dlib.shape_predictor(predictor_path)
 
-    # Combine indices for easier processing
-    combined_indices = left_eye_indices + right_eye_indices + lips_indices
 
-    # Count how many landmarks are not visible
-    not_visible_count = sum(1 for idx in combined_indices if face_landmarks.landmark[idx].visibility < 0.5)
+# Funktion, um Gesichtsmerkmale zu erkennen
+def detect_face_features(gray, rect):
+    shape = predictor(gray, rect)
+    shape = np.array([[p.x, p.y] for p in shape.parts()])
+    return shape
 
-    # Heuristic: if a significant number of landmarks are not visible, assume occlusion
-    return not_visible_count > len(combined_indices) * 0.1  # Adjust the ratio as needed
 
-# Initialize face mesh
-with mp_face_mesh.FaceMesh(min_detection_confidence=0.5, min_tracking_confidence=0.5) as face_mesh:
-    cap = cv2.VideoCapture(0)
+# Funktion zur Okklusionsanalyse
+def analyze_occlusions(landmarks):
+    # Einfache Überprüfung, ob Augen und Mund innerhalb der Kieferlinie liegen
+    jawline = landmarks[:17]
+    left_eye = landmarks[36:42]
+    right_eye = landmarks[42:48]
+    mouth = landmarks[48:68]
 
-    while cap.isOpened():
-        success, image = cap.read()
-        if not success:
-            print("Ignoring empty camera frame.")
-            continue
+    jawline_x = [p[0] for p in jawline]
+    jawline_y = [p[1] for p in jawline]
 
-        # Flip the image horizontally for a later selfie-view display
-        image = cv2.flip(image, 1)
+    min_x, max_x = min(jawline_x), max(jawline_x)
+    min_y, max_y = min(jawline_y), max(jawline_y)
 
-        # Convert the BGR image to RGB
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    def is_within_jawline(feature):
+        for x, y in feature:
+            if not (min_x <= x <= max_x and min_y <= y <= max_y):
+                return False
+        return True
 
-        # Process the image and detect faces
-        results = face_mesh.process(image)
+    if not all(
+        [is_within_jawline(feature) for feature in [left_eye, right_eye, mouth]]
+    ):
+        print("Mögliche Okklusion erkannt.")
+    else:
+        print("Keine Okklusion erkannt.")
 
-        # Draw the face mesh annotations on the image
-        image.flags.writeable = True
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-        occlusion_detected = False
-        if results.multi_face_landmarks:
-            for face_landmarks in results.multi_face_landmarks:
-                # Draw landmarks for visualization
-                mp.solutions.drawing_utils.draw_landmarks(
-                    image=image,
-                    landmark_list=face_landmarks,
-                    connections=mp_face_mesh.FACEMESH_TESSELATION,
-                    landmark_drawing_spec=mp.solutions.drawing_utils.DrawingSpec(color=(0, 255, 0), thickness=1, circle_radius=1)
-                )
+# Webcam erfassen
+cap = cv2.VideoCapture(0)
 
-                # Check for occlusion
-                if detect_occlusion(face_landmarks):
-                    occlusion_detected = True
-                    break  # If occlusion is detected, no need to check further
+while True:
+    # Bild von der Webcam erfassen
+    ret, image = cap.read()
+    if not ret:
+        break
 
-        print("No Occlusion Detected" if occlusion_detected else "Occlusion Detected")
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-        # Display the image
-        cv2.imshow('MediaPipe FaceMesh', image)
+    # Gesichter erkennen
+    faces = face_cascade.detectMultiScale(gray, 1.1, 4)
 
-        if cv2.waitKey(5) & 0xFF == 27:
-            break
+    for x, y, w, h in faces:
+        face_rect = dlib.rectangle(left=x, top=y, right=x + w, bottom=y + h)
+        landmarks = detect_face_features(gray, face_rect)
 
+        # Okklusionsanalyse
+        analyze_occlusions(landmarks)
+
+        # Zeichnen der Gesichtsmerkmale zum Veranschaulichen
+        for x, y in landmarks:
+            cv2.circle(image, (x, y), 2, (255, 0, 0), -1)
+
+    # Bild anzeigen
+    cv2.imshow("Webcam", image)
+
+    # Beenden, wenn 'q' gedrückt wird
+    if cv2.waitKey(1) & 0xFF == ord("q"):
+        break
+
+# Alles schließen, wenn die Schleife beendet wird
 cap.release()
 cv2.destroyAllWindows()
