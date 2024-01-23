@@ -3,14 +3,11 @@ import dlib
 import numpy as np
 
 # Laden des Haar-Kaskaden-Klassifikators für die Gesichtserkennung
-face_cascade = cv2.CascadeClassifier(
-    cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
-)
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
 
 # Laden des Dlib Shape Predictors
 predictor_path = "shape_predictor_68_face_landmarks.dat"  # Pfad zum Dlib-Modell
 predictor = dlib.shape_predictor(predictor_path)
-
 
 # Funktion, um Gesichtsmerkmale zu erkennen
 def detect_face_features(gray, rect):
@@ -18,34 +15,25 @@ def detect_face_features(gray, rect):
     shape = np.array([[p.x, p.y] for p in shape.parts()])
     return shape
 
-
 # Funktion zur Okklusionsanalyse
 def analyze_occlusions(landmarks):
-    # Einfache Überprüfung, ob Augen und Mund innerhalb der Kieferlinie liegen
-    jawline = landmarks[:17]
-    left_eye = landmarks[36:42]
-    right_eye = landmarks[42:48]
-    mouth = landmarks[48:68]
+    # Symmetrieprüfung
+    def symmetry_deviation(point_left, point_right, eye_center):
+        return abs((point_left[0] - eye_center[0]) - (eye_center[0] - point_right[0]))
 
-    jawline_x = [p[0] for p in jawline]
-    jawline_y = [p[1] for p in jawline]
+    eye_center = np.mean(landmarks[36:48], axis=0)
+    sym_deviation = sum([symmetry_deviation(landmarks[i], landmarks[17-i], eye_center) for i in range(17)])
+    sym_deviation += sum([symmetry_deviation(landmarks[i], landmarks[26-i], eye_center) for i in range(17, 22)])
+    sym_deviation += sum([symmetry_deviation(landmarks[i], landmarks[48-i], eye_center) for i in range(48, 55)])
+    avg_deviation = sym_deviation / (22 + 5 + 7)
 
-    min_x, max_x = min(jawline_x), max(jawline_x)
-    min_y, max_y = min(jawline_y), max(jawline_y)
+    # Schwellenwert für Symmetrieabweichung festlegen
+    symmetry_threshold = 10  # Beispielwert, sollte experimentell angepasst werden
 
-    def is_within_jawline(feature):
-        for x, y in feature:
-            if not (min_x <= x <= max_x and min_y <= y <= max_y):
-                return False
-        return True
-
-    if not all(
-        [is_within_jawline(feature) for feature in [left_eye, right_eye, mouth]]
-    ):
-        print("Mögliche Okklusion erkannt.")
+    if avg_deviation > symmetry_threshold:
+        print("Mögliche Okklusion durch Asymmetrie erkannt.")
     else:
-        print("Keine Okklusion erkannt.")
-
+        print("Keine Okklusion durch Asymmetrie erkannt.")
 
 # Webcam erfassen
 cap = cv2.VideoCapture(0)
