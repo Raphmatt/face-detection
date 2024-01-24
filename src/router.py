@@ -29,10 +29,10 @@ async def process_image(file: UploadFile = File(...)):
 
         # Save the image to a BytesIO object
         img_io = BytesIO()
-        image.save(img_io, 'JPEG', quality=100)
+        image.save(img_io, 'PNG')
         img_io.seek(0)
 
         # Return the image in response
-        return StreamingResponse(img_io, media_type="image/jpeg")
+        return StreamingResponse(img_io, media_type="image/png")
     except Exception as e:
         return {"error": str(e)}

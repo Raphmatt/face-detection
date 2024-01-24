@@ -57,10 +57,45 @@ class FaceAligner:
         material[0, 2] += (t_x - eyes_center[0])
         material[1, 2] += (t_y - eyes_center[1])
 
-        # apply the affine transformation
+
+        # apply the affine transformation with transparent border mode
         (w, h) = (self.desiredWidth, self.desiredHeight)
         output = cv2.warpAffine(image, material, (w, h),
                                 flags=cv2.INTER_CUBIC)
 
-        # return the aligned face
-        return output
+
+        # Add an alpha channel to the image
+        image_with_alpha = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
+
+        output_bounds = cv2.warpAffine(image_with_alpha, material, (w, h),
+                                flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_CONSTANT, borderValue=(0, 0, 0, 0))
+
+
+        # Check for out of bounds using alpha channel
+        out_of_bounds = self._check_alpha_border(output_bounds)
+
+        # return the aligned face and out_of_bounds status
+        return output, out_of_bounds
+
+    def _check_alpha_border(self, image: np.ndarray):
+        """
+        Check if the image's alpha channel has transparent borders indicating out of bounds condition.
+        :param image: The image (with alpha channel) to be checked.
+        :return: True if transparent borders are present, otherwise False.
+        """
+        # Extract the alpha channel
+        alpha_channel = image[:, :, 3]
+
+        # Check the borders of the image (top, bottom, left, right)
+        top_edge = alpha_channel[0, :]
+        bottom_edge = alpha_channel[-1, :]
+        left_edge = alpha_channel[:, 0]
+        right_edge = alpha_channel[:, -1]
+
+        # If any border has transparent pixels (alpha value 0), return True
+        if (np.any(top_edge == 0) or
+                np.any(bottom_edge == 0) or
+                np.any(left_edge == 0) or
+                np.any(right_edge == 0)):
+            return True
+        return False
