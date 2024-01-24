@@ -18,37 +18,37 @@
 
 # Todo
 
-- [ ] Docker
-  - [ ] Dockerfile
-  - [ ] docker-compose.yml
+- [x] Docker
+  - [x] Dockerfile
+  - [x] docker-compose.yml
 - [ ] API
   - [ ] FastAPI Functionality
-    - [ ] Human Face detection
+    - [x] Human Face detection
       - [x] Face count detection
     - [ ] Face visibility
-      - [ ] Face angle
+      - [ ] Face looking towards
         - [x] Detect face angle
         - [ ] Adjust face angle / threshold for face angle
       - [ ] Shoulder angle
         - [x] Detect shoulder angle
-        - [x] threshold for shoulder angle
+        - [ ] threshold for shoulder angle
       - [ ] Face visible from the front (WIP Pacal)
         - [ ] Detect face horizontal angle
         - [ ] threshold for face horizontal angle
       - [ ] Face not occluded by an object (Tricky task, tried with facemesh, but occlusion cannot be detected)
         - [ ] Detect occlusion
-    - [ ] Image optimization
-      - [ ] Remove background
+    - [x] Image optimization
+      - [x] Remove background
         - [x] Get mask of background
-        - [ ] Remove background
-      - [ ] Uniform cropping to the face (WIP Raphael)
-        - [ ] Detect face position
+        - [x] Remove background
+      - [x] Uniform cropping to the face (WIP Raphael)
+        - [x] Detect face position
         - [x] Crop image to face position
-        - [ ] Resize image to uniform size
-        - [ ] Rotate image to uniform angle
-      - [ ] Uniform aspect ratio (WIP Raphael)
-        - [ ] Apply uniform aspect ratio
-      - [ ] Constant, absolute dimensions (e.g. 500x500px) 
+        - [x] Resize image to uniform size
+        - [x] Rotate image to uniform angle
+      - [x] Uniform aspect ratio (WIP Raphael)
+        - [x] Apply uniform aspect ratio
+      - [x] Constant, absolute dimensions (e.g. 500x500px) 
         - [x] Scale image to constant, absolute dimensions
 
 
