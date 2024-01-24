@@ -1,0 +1,37 @@
+services:
+  profile-picture:
+    image: registry.gitlab.com/gibz/students/infa3a2023/profile-picture-server:gipeFix
+    container_name: profile-picture
+    env_file: .env
+    environment:
+      CLOUD_STORAGE_IMAGE_BUCKET: m321-infa3a-raphael
+    networks:
+      - gibzapp
+    ports:
+      - 8080:80
+    volumes:
+      - ./google-cloud-credentials.json:/app/google-cloud-credentials.json:ro
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8
+    container_name: profile-picture-db
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_USER: gibzapp
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: profilepicture
+    networks:
+      - gibzapp
+    ports:
+      - 13306:3306
+    volumes:
+      - db:/var/lib/mysql:rw
+      - ./db-dump:/docker-entrypoint-initdb.d
+
+networks:
+  gibzapp:
+
+volumes:
+  db:
