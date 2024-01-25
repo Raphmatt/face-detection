@@ -6,3 +6,4 @@ Pillow~=10.1.0
 pytest~=7.4.3
 opencv-contrib-python-headless-rolling~=5.0.0.20221015
 python-multipart~=0.0.6
+dlib~=19.24.2

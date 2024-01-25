@@ -4,5 +4,4 @@ mediapipe~=0.10.8
 numpy~=1.26.2
 Pillow~=10.1.0
 pytest~=7.4.3
-opencv-contrib-python~=4.9.0.80
-python-multipart~=0.0.6
+dlib~=19.24.2
