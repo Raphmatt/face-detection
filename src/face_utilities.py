@@ -13,118 +13,121 @@ from PIL import Image, ImageFilter
 from face_aligner import FaceAligner
 
 
-def align_face(cv_image: np.ndarray) -> np.ndarray:
+def align_face(cv_image: np.ndarray, method: str = 'mediapipe') -> np.ndarray:
     # Convert the BGR image to RGB (if your model expects RGB input)
     image_rgb = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
 
     # Detect faces and get bounding boxes
-    face_angle, left, right = get_face_details(image_rgb)
+    face_angle, left, right = get_face_details(image_rgb, method=method)
 
-    aligned_image, out_of_bounds = (FaceAligner(
+    aligned_image, out_of_bounds, rgba_aligned_image = (FaceAligner(
         eye_spacing=(0.36, 0.4),
         desired_width=512,
         desired_height=640)
-                     .align(cv_image, left, right))
+                                                        .align(cv_image, left, right))
 
     if face_angle is None:
         raise ValueError("No face detected.")
 
     binary_mask = get_binary_mask(mp.Image(mp.ImageFormat.SRGB, aligned_image))
+    _, binary_mask = cv2.threshold(cv2.cvtColor(binary_mask, cv2.COLOR_BGR2GRAY), 200, 255, cv2.THRESH_BINARY_INV)
+    binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (4, 4)))
+    binary_mask = np.array(Image.fromarray(binary_mask).filter(ImageFilter.ModeFilter(size=10)))
 
-    inverted_binary_mask = cv2.bitwise_not(binary_mask)
-    _, mask = cv2.threshold(cv2.cvtColor(binary_mask, cv2.COLOR_BGR2GRAY), 200, 255, cv2.THRESH_BINARY_INV)
-    _, inverted_mask = cv2.threshold(cv2.cvtColor(inverted_binary_mask, cv2.COLOR_BGR2GRAY), 200, 255,
-                                     cv2.THRESH_BINARY_INV)
+    # # Apply inverted mask to get the foreground (face)
+    # foreground = cv2.bitwise_and(aligned_image, aligned_image, mask=mask)
 
-    # optimized version (optional)
-    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (4, 4)))
-    inverted_mask = cv2.morphologyEx(inverted_mask, cv2.MORPH_OPEN,
-                                     cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (4, 4)))
+    if out_of_bounds:
+        # Use the alpha channel from rgba_aligned_image as an additional mask
+        alpha_mask = rgba_aligned_image[:, :, 3]
 
-    mask = np.array(Image.fromarray(mask).filter(ImageFilter.ModeFilter(size=10)))
-    inverted_mask = np.array(Image.fromarray(inverted_mask).filter(ImageFilter.ModeFilter(size=10)))
+        # Combine the alpha mask with the binary mask
+        combined_mask = cv2.bitwise_and(binary_mask, alpha_mask)
 
-    # Apply inverted mask to get the foreground (face)
-    foreground = cv2.bitwise_and(aligned_image, aligned_image, mask=mask)
-
-    # # Create a red background
-    # bg = np.zeros_like(aligned_image)
-    # bg[:, :] = [0xF0, 0xFF, 0xEB]  # ffffeb
-    #
-    # background = cv2.bitwise_and(bg, bg, mask=inverted_mask)
-    #
-    # # Create a shadow by blurring the mask
-    # shadow = cv2.GaussianBlur(mask, (21, 21), 0)
-    #
-    # # Adjust the intensity of the shadow if necessary
-    # shadow = cv2.multiply(shadow, np.array([20], dtype=np.float32))
-    #
-    # # Offset the shadow to simulate light direction
-    # shadow_offset = 50  # Adjust this value as needed
-    # shadow = np.roll(shadow, shadow_offset, axis=0)  # Shifts the shadow down
-    # shadow = np.roll(shadow, shadow_offset, axis=1)  # Shifts the shadow to the right
-    #
-    # # Create a layer for the shadow
-    # shadow_layer = np.zeros_like(aligned_image)
-    # shadow_layer[:, :] = [50, 50, 50]  # Shadow color, change to dark gray or black
-    #
-    # # Apply the shadow mask to the shadow layer
-    # shadow_layer = cv2.bitwise_and(shadow_layer, shadow_layer, mask=shadow)
-    #
-    # # Combine the shadow layer with the background
-    # background_with_shadow = cv2.add(background, shadow_layer)
-    #
-    # # Combine the person (foreground) with the background and shadow
-    # final_image_with_shadow = cv2.add(foreground, background_with_shadow)
+        # Apply the combined mask to get the foreground (face)
+        foreground = cv2.bitwise_and(rgba_aligned_image, rgba_aligned_image, mask=combined_mask)
+    else:
+        # If not out of bounds, use the binary mask alone
+        foreground = cv2.bitwise_and(aligned_image, aligned_image, mask=binary_mask)
 
     # Convert the foreground to RGBA
     foreground_rgba = cv2.cvtColor(foreground, cv2.COLOR_RGB2RGBA)
 
-    # Set the alpha channel to the mask
-    foreground_rgba[:, :, 3] = mask
+    # Set the alpha channel to the combined mask or binary mask
+    foreground_rgba[:, :, 3] = combined_mask if out_of_bounds else binary_mask
 
     return foreground_rgba  # Return the RGBA image with transparent background
 
 
-def get_face_count(mp_image: mp.Image) -> tuple[int, list[tuple[int, int, int, int]]]:
+def get_face_count(mp_image: mp.Image, method: str = "mediapipe") -> tuple[int, list[tuple[int, int, int, int]]]:
     """
     Detect the number of faces in an image using Mediapipe.
     :param mp_image: The input image as a MediaPipe Image object.
     :return: The number of faces detected and their bounding box coordinates.
     """
-    model_path = os.path.join(
-        os.path.dirname(__file__),
-        "mp_models",
-        "face_detection",
-        "blaze_face_short_range.tflite",
-    )
-    with open(model_path, "rb") as f:
-        model = f.read()
 
-    # STEP 1: Create an FaceDetector object.
-    options = vision.FaceDetectorOptions(
-        base_options=(python.BaseOptions(
-            model_asset_buffer=model
-        )), min_detection_confidence=0.7
-    )
+    if method == "mediapipe":
+        model_path = os.path.join(
+            os.path.dirname(__file__),
+            "mp_models",
+            "face_detection",
+            "blaze_face_short_range.tflite",
+        )
+        with open(model_path, "rb") as f:
+            model = f.read()
 
-    # Using 'with' statement for automatic resource management.
-    with vision.FaceDetector.create_from_options(options) as detector:
-        # STEP 2: Detect faces in the input image.
-        detection_result = detector.detect(mp_image)
+        # STEP 1: Create an FaceDetector object.
+        options = vision.FaceDetectorOptions(
+            base_options=(python.BaseOptions(
+                model_asset_buffer=model
+            )), min_detection_confidence=0.7
+        )
 
-        # STEP 3: Count the number of faces detected and get their bounding boxes.
-        face_count = len(detection_result.detections)
-        face_boxes = []
-        for detection in detection_result.detections:
-            bbox = detection.bounding_box
-            x = int(bbox.origin_x)
-            y = int(bbox.origin_y)
-            w = int(bbox.width)
-            h = int(bbox.height)
-            face_boxes.append((x, y, w, h))
+        # Using 'with' statement for automatic resource management.
+        with vision.FaceDetector.create_from_options(options) as detector:
+            # STEP 2: Detect faces in the input image.
+            detection_result = detector.detect(mp_image)
 
-        return face_count, face_boxes
+            # STEP 3: Count the number of faces detected and get their bounding boxes.
+            face_count = len(detection_result.detections)
+            face_boxes = []
+            for detection in detection_result.detections:
+                bbox = detection.bounding_box
+                x = int(bbox.origin_x)
+                y = int(bbox.origin_y)
+                w = int(bbox.width)
+                h = int(bbox.height)
+                face_boxes.append((x, y, w, h))
+
+            return face_count, face_boxes
+    elif method == "dlib":
+        # Initialize dlib's face detector and facial landmark predictor
+        detector = dlib.get_frontal_face_detector()
+        model_path = os.path.join(
+            os.path.dirname(__file__),
+            "dlib_models",
+            "shape_predictor_68_face_landmarks.dat"
+        )
+        predictor = dlib.shape_predictor(model_path)
+
+        # Convert the image to grayscale
+        gray = cv2.cvtColor(mp_image.numpy_view(), cv2.COLOR_BGR2GRAY)
+
+        # Detect faces in the grayscale image
+        faces = detector(gray, 1)
+
+        # Return the number of faces detected and their bounding boxes
+
+        bbox = []
+
+        for face in faces:
+            x = face.left()
+            y = face.top()
+            w = face.right() - x
+            h = face.bottom() - y
+            bbox.append((x, y, w, h))
+
+        return len(faces), bbox
 
 
 def get_face_details(cv_image: np.ndarray, method: str = 'mediapipe') -> tuple[Any, tuple[int, int], tuple[int, int]] | \
@@ -269,11 +272,11 @@ def get_binary_mask(mp_image: mp.Image, method: str = "selfie") -> ndarray[Any, 
 
     elif method == "multiclass":
         model_path = os.path.join(
-                os.path.dirname(__file__),
-                "mp_models",
-                "segmentation",
-                "selfie_multiclass_256x256.tflite",
-            )
+            os.path.dirname(__file__),
+            "mp_models",
+            "segmentation",
+            "selfie_multiclass_256x256.tflite",
+        )
 
         with open(model_path, "rb") as f:
             model = f.read()

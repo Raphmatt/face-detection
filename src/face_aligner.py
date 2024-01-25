@@ -75,7 +75,7 @@ class FaceAligner:
         out_of_bounds = self._check_alpha_border(output_bounds)
 
         # return the aligned face and out_of_bounds status
-        return output, out_of_bounds
+        return output, out_of_bounds, output_bounds
 
     def _check_alpha_border(self, image: np.ndarray):
         """

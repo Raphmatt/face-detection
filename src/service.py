@@ -15,15 +15,25 @@ from image_utilities import uploadFile_2_np_image
 async def process_image(file: UploadFile = File(...)) -> np.ndarray:
     np_image = await uploadFile_2_np_image(file)
 
-    face_count, face_boxes = get_face_count(mp.Image(image_format=mp.ImageFormat.SRGB, data=np_image))
+    face_count, face_boxes = get_face_count(
+        mp.Image(image_format=mp.ImageFormat.SRGB, data=np_image),
+        method="mediapipe")
+
+    method = "mediapipe"
 
     if face_count != 1:
-        raise ValueError("Image must contain exactly one face. Current face count: " + str(face_count))
+        face_count, face_boxes = get_face_count(
+            mp.Image(image_format=mp.ImageFormat.SRGB, data=np_image),
+            method="dlib")
+        if face_count != 1:
+            raise ValueError("Image must contain exactly one face. Current face count: " + str(face_count))
+        else:
+            method = "dlib"
 
     # additional checks if the face is valid
 
     # align face
-    final_image = align_face(np_image)
+    final_image = align_face(np_image, method=method)
 
     return final_image
 
