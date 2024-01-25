@@ -1,8 +1,9 @@
-from fastapi import APIRouter
-from fastapi import UploadFile, File
-from PIL import Image
 from io import BytesIO
+
 import numpy as np
+from PIL import Image
+from fastapi import APIRouter
+from fastapi import UploadFile, File, Query
 from fastapi.responses import StreamingResponse
 
 import service
@@ -16,9 +17,12 @@ async def heartbeat():
 
 
 @router.post("/image/process")
-async def process_image(file: UploadFile = File(...)):
+async def process_image(
+    file: UploadFile = File(...),
+    bounds: bool = Query(False, alias="allow ouf of bounds"),
+):
     try:
-        image_array = await service.process_image(file)
+        image_array = await service.process_image(file, allow_out_of_bounds=bounds)
 
         # Ensure the NumPy array is in the correct format (e.g., uint8)
         if image_array.dtype != np.uint8:

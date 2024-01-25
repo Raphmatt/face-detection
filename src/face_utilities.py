@@ -13,7 +13,10 @@ from PIL import Image, ImageFilter
 from face_aligner import FaceAligner
 
 
-def align_face(cv_image: np.ndarray, method: str = 'mediapipe') -> np.ndarray:
+def align_face(
+        cv_image: np.ndarray,
+        method: str = 'mediapipe',
+        allow_out_of_bounds: bool = False) -> np.ndarray:
     # Convert the BGR image to RGB (if your model expects RGB input)
     image_rgb = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
 
@@ -23,21 +26,15 @@ def align_face(cv_image: np.ndarray, method: str = 'mediapipe') -> np.ndarray:
     if face_angle is None:
         raise ValueError("No face detected.")
 
-    sr_espcn = cv2.dnn_superres.DnnSuperResImpl.create()
-    model_path = os.path.join(
-        os.path.dirname(__file__),
-        "models",
-        "ESPCN_x4.pb"
-    )
-    sr_espcn.readModel(model_path)
-    sr_espcn.setModel("espcn", 4)
-
+    # Align the face
     aligned_image, out_of_bounds, rgba_aligned_image = (FaceAligner(
         eye_spacing=(0.36, 0.4),
         desired_width=512,
-        desired_height=640,
-        sr_model=sr_espcn)
+        desired_height=640)
                                                         .align(cv_image, left, right))
+
+    if out_of_bounds and not allow_out_of_bounds:
+        raise ValueError("Face is out of bounds. (The face is too close to the edge of the image.)")
 
     binary_mask = get_binary_mask(mp.Image(mp.ImageFormat.SRGB, aligned_image))
     _, binary_mask = cv2.threshold(cv2.cvtColor(binary_mask, cv2.COLOR_BGR2GRAY), 200, 255, cv2.THRESH_BINARY_INV)
@@ -68,9 +65,29 @@ def align_face(cv_image: np.ndarray, method: str = 'mediapipe') -> np.ndarray:
 
 def get_face_count(mp_image: mp.Image, method: str = "mediapipe") -> tuple[int, list[tuple[int, int, int, int]]]:
     """
-    Detect the number of faces in an image using Mediapipe.
-    :param mp_image: The input image as a MediaPipe Image object.
-    :return: The number of faces detected and their bounding box coordinates.
+    Detect
+    the
+    number
+    of
+    faces in an
+    image
+    using
+    Mediapipe.
+    :param
+    mp_image: The
+    input
+    image as a
+    MediaPipe
+    Image
+    object.
+    :return: The
+    number
+    of
+    faces
+    detected and their
+    bounding
+    box
+    coordinates.
     """
 
     if method == "mediapipe":
@@ -142,10 +159,43 @@ def get_face_count(mp_image: mp.Image, method: str = "mediapipe") -> tuple[int, 
 def get_face_details(cv_image: np.ndarray, method: str = 'mediapipe') -> tuple[Any, tuple[int, int], tuple[int, int]] | \
                                                                          tuple[None, None, None]:
     """
-    Gets the angle of the face as well as the coordinates of the left and right eye.
-    :param cv_image: The input image with the face to be rotated as a numpy array.
-    :param method: The method to use for face detection ('mediapipe' or 'dlib').
-    :return: The angle of the face, the coordinates of the left eye and the coordinates of the right eye.
+    Gets
+    the
+    angle
+    of
+    the
+    face as well as the
+    coordinates
+    of
+    the
+    left and right
+    eye.
+    :param
+    cv_image: The
+    input
+    image
+    with the face to be rotated as a numpy array.
+    :param
+    method: The
+    method
+    to
+    use
+    for face detection('mediapipe' or 'dlib').
+        :return: The
+    angle
+    of
+    the
+    face, the
+    coordinates
+    of
+    the
+    left
+    eye and the
+    coordinates
+    of
+    the
+    right
+    eye.
     """
     if method == 'mediapipe':
         # Initialize the FaceMesh object with a 'with' statement for automatic resource management.
@@ -233,11 +283,41 @@ def get_face_details(cv_image: np.ndarray, method: str = 'mediapipe') -> tuple[A
 
 def get_binary_mask(mp_image: mp.Image, method: str = "selfie") -> ndarray[Any, dtype[Any]]:
     """
-    Returns a binary mask of the input image using Mediapipe.
-    A 3 diamensional numpy array is returned. The background is white, the foreground is black. (255, 255, 255) and (0, 0, 0) respectively.
-    :param mp_image: The input image as a MediaPipe Image object.
-    :param method: Method used for background masking. "selfie" or "multiclass"
-    :return: Binary mask as a numpy array. The bg is white, the fg is black.
+    Returns
+    a
+    binary
+    mask
+    of
+    the
+    input
+    image
+    using
+    Mediapipe.
+    A
+    3
+    diamensional
+    numpy
+    array is returned.The
+    background is white, the
+    foreground is black.(255, 255, 255) and (0, 0, 0)
+    respectively.
+    :param
+    mp_image: The
+    input
+    image as a
+    MediaPipe
+    Image
+    object.
+    :param
+    method: Method
+    used
+    for background masking. "selfie" or "multiclass"
+    :return: Binary
+    mask as a
+    numpy
+    array.The
+    bg is white, the
+    fg is black.
     """
 
     final_image = None
