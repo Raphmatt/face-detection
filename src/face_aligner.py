@@ -6,7 +6,8 @@ class FaceAligner:
     def __init__(self,
                  eye_spacing=(0.36, 0.40),
                  desired_width=1024,
-                 desired_height=1280):
+                 desired_height=1280,
+                 sr_model=None):
         """
         Aligns a face to a desired size and eye spacing
         :param eye_spacing: The space of the eyes and the edge of the image
@@ -19,29 +20,36 @@ class FaceAligner:
         self.desiredWidth = desired_width
         self.desiredHeight = desired_height
 
+        self.sr_model = sr_model
+
         # if the desired face height is None, set it to be the
         # desired face width (normal behavior)
         if self.desiredHeight is None:
             self.desiredHeight = self.desiredWidth
 
-    def align(self, image: np.ndarray, left_eye_pts, right_eye_pts):
+    def align(self, image: np.ndarray, left_eye_pts, right_eye_pts, use_sr_upscaling=False):
         # compute the angle between the eye centroids
         d_y = right_eye_pts[1] - left_eye_pts[1]
         d_x = right_eye_pts[0] - left_eye_pts[0]
         angle = np.degrees(np.arctan2(d_y, d_x))
-
-        # compute the desired right eye x-coordinate based on the
-        # desired x-coordinate of the left eye
-        desired_right_eye_x = 1.0 - self.desiredLeftEye[0]
 
         # determine the scale of the new resulting image by taking
         # the ratio of the distance between eyes in the *current*
         # image to the ratio of distance between eyes in the
         # *desired* image
         dist = np.sqrt((d_x ** 2) + (d_y ** 2))
-        desired_dist = (desired_right_eye_x - self.desiredLeftEye[0])
-        desired_dist *= self.desiredWidth
+        desired_dist = (1.0 - self.desiredLeftEye[0] - self.desiredLeftEye[0]) * self.desiredWidth
         scale = desired_dist / dist
+
+        if scale > 1 and self.sr_model and not use_sr_upscaling:
+            # Upscale the image using sr_espcn
+            upscaled_image = self.sr_model.upsample(image)  # Assuming 4x upscaling
+            # Adjust the eye points
+            left_eye_pts = tuple([x * 4 for x in left_eye_pts])
+            right_eye_pts = tuple([x * 4 for x in right_eye_pts])
+            # Recursively call align with the upscaled image
+            return self.align(upscaled_image, left_eye_pts, right_eye_pts, use_sr_upscaling=True)
+
 
         # compute center (x, y)-coordinates (i.e., the median point)
         # between the two eyes in the input image

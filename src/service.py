@@ -97,7 +97,7 @@ def shoulder_angle_valid(mp_image: mp.Image) -> bool:
 
     model_path = os.path.join(
         os.path.dirname(__file__),
-        "mp_models",
+        "models/mp_models",
         "pose_detection",
         "pose_landmarker_lite.task",
     )
