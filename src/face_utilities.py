@@ -65,29 +65,10 @@ def align_face(
 
 def get_face_count(mp_image: mp.Image, method: str = "mediapipe") -> tuple[int, list[tuple[int, int, int, int]]]:
     """
-    Detect
-    the
-    number
-    of
-    faces in an
-    image
-    using
-    Mediapipe.
-    :param
-    mp_image: The
-    input
-    image as a
-    MediaPipe
-    Image
-    object.
-    :return: The
-    number
-    of
-    faces
-    detected and their
-    bounding
-    box
-    coordinates.
+    Detect the number of faces in an image using Mediapipe.
+    :param mp_image: The input image as a MediaPipe Image object.
+    :param method: The method to use for face detection('mediapipe' or 'dlib').
+    :return: The number of faces detected and their bounding box coordinates.
     """
 
     if method == "mediapipe":
