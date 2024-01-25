@@ -20,22 +20,29 @@ def align_face(cv_image: np.ndarray, method: str = 'mediapipe') -> np.ndarray:
     # Detect faces and get bounding boxes
     face_angle, left, right = get_face_details(image_rgb, method=method)
 
+    if face_angle is None:
+        raise ValueError("No face detected.")
+
+    sr_espcn = cv2.dnn_superres.DnnSuperResImpl.create()
+    model_path = os.path.join(
+        os.path.dirname(__file__),
+        "models",
+        "ESPCN_x4.pb"
+    )
+    sr_espcn.readModel(model_path)
+    sr_espcn.setModel("espcn", 4)
+
     aligned_image, out_of_bounds, rgba_aligned_image = (FaceAligner(
         eye_spacing=(0.36, 0.4),
         desired_width=512,
-        desired_height=640)
+        desired_height=640,
+        sr_model=sr_espcn)
                                                         .align(cv_image, left, right))
-
-    if face_angle is None:
-        raise ValueError("No face detected.")
 
     binary_mask = get_binary_mask(mp.Image(mp.ImageFormat.SRGB, aligned_image))
     _, binary_mask = cv2.threshold(cv2.cvtColor(binary_mask, cv2.COLOR_BGR2GRAY), 200, 255, cv2.THRESH_BINARY_INV)
     binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (4, 4)))
     binary_mask = np.array(Image.fromarray(binary_mask).filter(ImageFilter.ModeFilter(size=10)))
-
-    # # Apply inverted mask to get the foreground (face)
-    # foreground = cv2.bitwise_and(aligned_image, aligned_image, mask=mask)
 
     if out_of_bounds:
         # Use the alpha channel from rgba_aligned_image as an additional mask
@@ -69,6 +76,7 @@ def get_face_count(mp_image: mp.Image, method: str = "mediapipe") -> tuple[int, 
     if method == "mediapipe":
         model_path = os.path.join(
             os.path.dirname(__file__),
+            "models",
             "mp_models",
             "face_detection",
             "blaze_face_short_range.tflite",
@@ -105,6 +113,7 @@ def get_face_count(mp_image: mp.Image, method: str = "mediapipe") -> tuple[int, 
         detector = dlib.get_frontal_face_detector()
         model_path = os.path.join(
             os.path.dirname(__file__),
+            "models",
             "dlib_models",
             "shape_predictor_68_face_landmarks.dat"
         )
@@ -184,6 +193,7 @@ def get_face_details(cv_image: np.ndarray, method: str = 'mediapipe') -> tuple[A
         detector = dlib.get_frontal_face_detector()
         model_path = os.path.join(
             os.path.dirname(__file__),
+            "models",
             "dlib_models",
             "shape_predictor_68_face_landmarks.dat"
         )
@@ -236,6 +246,7 @@ def get_binary_mask(mp_image: mp.Image, method: str = "selfie") -> ndarray[Any, 
 
         model_path = os.path.join(
             os.path.dirname(__file__),
+            "models",
             "mp_models",
             "segmentation",
             "square_selfie_segmenter.tflite",
@@ -273,6 +284,7 @@ def get_binary_mask(mp_image: mp.Image, method: str = "selfie") -> ndarray[Any, 
     elif method == "multiclass":
         model_path = os.path.join(
             os.path.dirname(__file__),
+            "models",
             "mp_models",
             "segmentation",
             "selfie_multiclass_256x256.tflite",

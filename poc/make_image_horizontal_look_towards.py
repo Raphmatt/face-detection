@@ -17,7 +17,7 @@ BG_COLOR = (0, 255, 196)
 
 MODEL = os.path.join(
     os.path.dirname(__file__),
-    "../src/mp_models/segmentation/selfie_multiclass_256x256.tflite")
+    "../src/models/mp_models/segmentation/selfie_multiclass_256x256.tflite")
 
 with open(MODEL, 'rb') as f:
     model = f.read()
