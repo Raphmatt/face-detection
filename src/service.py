@@ -23,7 +23,7 @@ async def process_image(
     :param file: UploadFile from FastAPI
     :param override_file: If UploadFile is not used, this can be used to pass a numpy array directly (for manual testing
     :param allow_out_of_bounds: Allow the face to be out of bounds (e.g. if the face is on the edge of the image)
-    :param spacing_side: The spacing of the eye and the sid edge of the image
+    :param spacing_side: The spacing of the eye and the side edge of the image
     :param spacing_top: The spacing of the eye and the top edge of the image
     :param desired_width: The desired width of the final image
     :param default_height: The desired height of the final image
@@ -45,22 +45,23 @@ async def process_image(
         face_count, face_boxes = get_face_count(mp.Image(image_format=mp.ImageFormat.SRGB, data=np_image),
                                                 method="dlib")
         if face_count != 1:
-            raise ValueError("Image must contain exactly one face. Current face count: " + str(face_count))
+            raise ValueError("Image must contain exactly one face. face count: " + str(face_count))
         else:
             method = "dlib"
 
     face_angle, left, right = get_face_details(np_image, method=method)
 
     if face_angle > 10:
-        raise ValueError("Face angle is too large. Current face angle: " + str(face_angle))
+        raise ValueError("Face angle too large. angle: " + str(face_angle))
 
-    shoulder_angle, shoulder_angle_okay = shoulder_angle_valid(np_image)
+    if method == "mediapipe":
+        shoulder_angle, shoulder_angle_okay = shoulder_angle_valid(np_image)
 
-    if not shoulder_angle_okay:
-        raise ValueError("Shoulder angle is too large. Current shoulder angle: " + str(shoulder_angle))
+        if not shoulder_angle_okay:
+            raise ValueError("Shoulder angle too large. angle: " + str(shoulder_angle))
 
-    if not face_looking_straight(np_image):
-        raise ValueError("Face is not looking straight")
+        if not face_looking_straight(np_image):
+            raise ValueError("Face not looking straight into camera.")
 
     # align face
     final_image = align_face(

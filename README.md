@@ -34,10 +34,13 @@ Die Python FastAPI bietet zwei Schnittstellen:
 ### Parameter "image/process"
 
 | Parameter | Default | Typ | Beschreibung |
-| ------ | ------ | ------ | ------ |
+| ---- | ---- | ---- | ---- |
 | bounds | False | boolean | Erlaube sichtbare Bildkanten |
 | side_spacing | 0.72 | number | Abstand der Augen zum Bildrand <br> 0 = Augen am Rand <br> 0.9998 = Augen zentriert von weitem |
-| top_spacing | 0.4 | number | vertikale Position der Augen <br> 0 = Augen am oberen Rand <br> 0.9998 = Augen am unteren Rand|
+| top_spacing | 0.4 | number | vertikale Position der Augen <br> 0 = Augen am oberen Rand <br> 0.9998 = Augen am unteren Rand |
+| width | 512 | integer | Breite des finalen Bildes |
+| height | 640 | integer | Höhe des finalen Bildes |
+| binary_method | multiclass | string | Methode, mit welcher der Hintergrund <br> entfernt wird <br>multiclass = genauer, langsamer <br> selfie = ungenauer, schneller |
 
 ## Ablauf
 
@@ -66,6 +69,21 @@ Auch im Rust Service könnte man die URL einfach auf einen anderen Service verwe
 
 ![Static Badge](https://img.shields.io/badge/FastAPI-0.105.0-darkgreen?logo=fastapi)
 
+## Designentscheid
+
+Wir haben uns dafür entschieden Mediapipe zu nutzen auf Grund der hohen Konfigurierbarkeit und der Möglichkeit zur lokalen Ausführung. Ebenfalls bietet es sich an, dass wir unsere Kenntnise über Computer Vision erweitern können und dabei noch unsere Python Skills vertiefen.
+
+Bei der Implementation in die existierende GIBZ Lösung haben wir uns drei Varianten überlegt:
+
+1. Aufruf direkt über den Mobile Client
+2. Aufruf im Rust Service
+3. Aufruf im Web-Frontend
+
+Schlussendlich haben wir uns für die **zweite** Methode entschieden aus den folgenden Gründen:
+
+- keine Updates im Mobile Client notwendig, welche eventuell schwieriger zu implementieren/deployen sein könnten
+
+- die Read- / Write-Prozesse im Google Bucket werden auf einem Minimum gehalten, da wir davon ausgehen, dass eine hohe Anzahl Requests zu höheren Kosten führen würde
 
 ## Qualität der Lösung
 
@@ -94,7 +112,7 @@ Auch im Rust Service könnte man die URL einfach auf einen anderen Service verwe
 
 ## Integration ins Gesamtsystem
 
-Das Einbinden in das Gesamtsystem, wie auch im Diagramm gezeigt, ist nicht aufwändig, und die erforderlichen Code-Änderungen wurden in unserem Fork durchgeführt.
+Das Einbinden in das Gesamtsystem, wie auch im Diagramm gezeigt, ist nicht aufwändig, und die erforderlichen Code-Änderungen wurden in [unserem Fork](https://gitlab.com/GIBZ/students/infa3a2023/profile-picture-server/-/tree/gipeFix?ref_type=heads) durchgeführt.
 
 ## Video
 
