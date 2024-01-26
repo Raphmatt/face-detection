@@ -100,5 +100,5 @@ def test_shoulder_angle_valid_returns_result(file: str, expected_shoulder_angle:
     filepath = data_path(file)
     # image = mp.Image.create_from_file(filepath)
     image = cv2.cvtColor(cv2.imread(filepath), cv2.COLOR_BGR2RGB)
-    is_shoulder_angle_valid = shoulder_angle_valid(image)
+    _, is_shoulder_angle_valid = shoulder_angle_valid(image)
     assert is_shoulder_angle_valid == expected_shoulder_angle
