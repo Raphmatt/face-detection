@@ -2,6 +2,11 @@
 
 ## Setup
 
+### Requirements
+
+- Python 3.11
+- Docker 
+
 1. Klonen Sie das Projekt auf Ihren Rechner.
 
     ```bash
@@ -17,30 +22,6 @@
 3. Öffnen Sie die Swagger-Seite [docs](http://localhost:8000/docs).
 
 
-## Original Requirements
-
-
-### Validierung der Profilfotos
-
-Die Inhaltliche Validierung der Profilfotos umfasst zumindest folgende Aspekte (Mindestanforderungen):
-
-- Auf dem Foto soll genau ein menschliches Gesicht erkennbar sein.
-- Das Gesicht auf dem Foto muss vollständig sichtbar sein.
-- Das Gesicht muss frontal aufgenommen sein. Der Kopf darf also in keiner Achse zu stark geneigt sein.
-- Das Gesicht darf nicht durch verdeckt sein (z.B. durch Masken, Haustiere, Sonnenbrillen, ...).
-
-### Optimierung der Profilfotos
-
-Sofern alle relevanten Validierungen erfolgreich abgeschlossen werden konnten, sollen die Profilfotos für die weitere Verwendung optimiert werden.
-
-#### Entfernung des Hintergrundes
-
-Der Hintergrund soll entfernt werden. Als Endprodukt soll ein Profilfoto resultieren, in welchem die fotografierte Person freigestellt, vor einem transparenten Hintergrund abgebildet ist. Bezüglich Dateiformat existieren keine weiteren Vorgaben, ein breites Einsatzspektrum soll jedoch angestrebt werden.
-
-#### Uniformer Zuschnitt
-
-Alle Profilbilder sollen einen uniformen Zuschnitt erfahren, damit die fotografierten Gesichter grundsätzlich gleich gross erscheinen. Bei der Ausrichtung, Positionierung und Grösse des Gesichts sollen nach Möglichkeit geltende Standards oder Konventionen angewendet werden. Das resultierende Foto soll in einem uniformen Seitenverhältnis mit konstanten, absoluten Dimensionen persistiert werden.
-
 ## Schnittstellen
 
 Die Python FastAPI bietet zwei Schnittstellen:
@@ -49,6 +30,14 @@ Die Python FastAPI bietet zwei Schnittstellen:
 |-------------|--------------------|------------------|----------------------------------------|
 | **GET**     | /heartbeat         | Keine Parameter  | Gibt den Status des Services zurück    |
 | **POST**    | /image/process     | Ein .png-Bild    | Verarbeitet das Bild und sendet es zurück|
+
+### Parameter "image/process"
+
+| Parameter | Default | Typ | Beschreibung |
+| ------ | ------ | ------ | ------ |
+| bounds | False | boolean | Erlaube sichtbare Bildkanten |
+| side_spacing | 0.72 | number | Abstand der Augen zum Bildrand <br> 0 = Augen am Rand <br> 0.9998 = Augen zentriert von weitem |
+| top_spacing | 0.4 | number | vertikale Position der Augen <br> 0 = Augen am oberen Rand <br> 0.9998 = Augen am unteren Rand|
 
 ## Ablauf
 
@@ -94,6 +83,12 @@ Auch im Rust Service könnte man die URL einfach auf einen anderen Service verwe
 
 - Wir mussten sehr viel Zeit in das lernen von Computer Vision und die eigentliche Implementation investieren. Dies wäre durch das verwenden eines externen Services sicher leichter gefallen.
 
+## Umgesetzt
+
+- Auf dem Foto soll genau ein menschliches Gesicht erkennbar sein.
+- Das Gesicht auf dem Foto muss vollständig sichtbar sein.
+- Das Gesicht muss frontal aufgenommen sein. Der Kopf darf also in keiner Achse zu stark geneigt sein.
+- Das Gesicht darf nicht durch verdeckt sein (z.B. durch Masken, Haustiere, Sonnenbrillen, ...).
 
 ## Video
 
