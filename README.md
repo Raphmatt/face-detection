@@ -111,7 +111,7 @@ der es dann in den Bucket lädt.
 
 ### Flowdiagramm
 
-![img](./files/FlowDiagram.png){width=50%}
+![img](./files/FlowDiagram.png){width=10%}
 
 ## Flexibilität
 
