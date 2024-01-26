@@ -23,7 +23,8 @@ async def process_image(
         spacing_side: float = Query(0.72, alias="side_spacing", description="Spacing on the side (0 = edge, 0.99998 = middle)"),
         spacing_top: float = Query(0.4, alias="top_spacing", description="Spacing on the top (0 = top edge, 0.99998 = bottom edge, 0.5 = middle)"),
         desired_width: int = Query(512, alias="width", description="Desired width of the final image"),
-        default_height: int = Query(640, alias="height", description="Desired height of the final image")
+        default_height: int = Query(640, alias="height", description="Desired height of the final image"),
+        binary_method: str = Query("multiclass", alias="binary_method", description="Method used for background removal (multiclass (more accurate, slower), selfie (faster, less accurate)")
 ):
     try:
         image_array = await service.process_image(
@@ -32,7 +33,8 @@ async def process_image(
             spacing_side=spacing_side,
             spacing_top=spacing_top,
             desired_width=desired_width,
-            default_height=default_height)
+            default_height=default_height,
+            binary_method=binary_method)
 
         # Ensure the NumPy array is in the correct format (e.g., uint8)
         if image_array.dtype != np.uint8:

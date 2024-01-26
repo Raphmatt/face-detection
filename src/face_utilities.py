@@ -1,5 +1,5 @@
 import os
-from typing import Any
+from typing import Any, Tuple
 
 import dlib
 import cv2
@@ -16,35 +16,31 @@ from face_aligner import FaceAligner
 
 def align_face(
         cv_image: np.ndarray,
-        method: str = 'mediapipe',
         allow_out_of_bounds: bool = False,
         spacing_side: float = 0.72,
         spacing_top: float = 0.4,
         desired_width: int = 512,
         desired_height: int = 640,
-
+        face_angle: float = None,
+        left_eye_point: tuple[int, int] = None,
+        right_eye_point: tuple[int, int] = None,
+        binary_method: str = "multiclass"
 ) -> np.ndarray:
-    # Convert the BGR image to RGB (if your model expects RGB input)
-    image_rgb = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
-
-    # Detect faces and get bounding boxes
-    face_angle, left, right = get_face_details(image_rgb, method=method)
-
     if face_angle is None:
         raise ValueError("No face detected.")
 
-    eye_spacing = (spacing_side/2, spacing_top)
+    eye_spacing = (spacing_side / 2, spacing_top)
     # Align the face
     aligned_image, out_of_bounds, rgba_aligned_image = (FaceAligner(
         eye_spacing=eye_spacing,
         desired_width=desired_width,
         desired_height=desired_height)
-                                                        .align(cv_image, left, right))
+                                                        .align(cv_image, left_eye_point, right_eye_point))
 
     if out_of_bounds and not allow_out_of_bounds:
         raise ValueError("Face is out of bounds. (The face is too close to the edge of the image.)")
 
-    binary_mask = get_binary_mask(mp.Image(mp.ImageFormat.SRGB, aligned_image))
+    binary_mask = get_binary_mask(mp.Image(mp.ImageFormat.SRGB, aligned_image), method=binary_method)
     _, binary_mask = cv2.threshold(cv2.cvtColor(binary_mask, cv2.COLOR_BGR2GRAY), 200, 255, cv2.THRESH_BINARY_INV)
     binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (4, 4)))
     binary_mask = np.array(Image.fromarray(binary_mask).filter(ImageFilter.ModeFilter(size=10)))
@@ -343,7 +339,9 @@ def get_binary_mask(mp_image: mp.Image, method: str = "selfie") -> ndarray[Any, 
 
     return np.array(pil_image_mask)
 
-def face_looking_streight(image: np.ndarray, x_threshold_angle_up=5, x_threshold_angle_down=-2, y_threshold_angle=5) -> bool:
+
+def face_looking_straight(image: np.ndarray, x_threshold_angle_up=5, x_threshold_angle_down=-2,
+                          y_threshold_angle=5) -> bool:
     threshold_angle = 6
 
     mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image)
@@ -363,7 +361,6 @@ def face_looking_streight(image: np.ndarray, x_threshold_angle_up=5, x_threshold
 
         if not results.multi_face_landmarks:
             raise ValueError("No face detected.")
-
 
         if len(results.multi_face_landmarks) != 1:
             raise ValueError(
@@ -403,8 +400,10 @@ def face_looking_streight(image: np.ndarray, x_threshold_angle_up=5, x_threshold
             return True
 
 
-def shoulder_angle_valid(mp_image: mp.Image) -> bool:
+def shoulder_angle_valid(np_image: np.ndarray) -> bool | tuple[float, bool]:
     threshold_angle = 30.0
+
+    mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=np_image)
 
     model_path = os.path.join(
         os.path.dirname(__file__),
@@ -437,7 +436,7 @@ def shoulder_angle_valid(mp_image: mp.Image) -> bool:
         )
         angle_degrees = math.degrees(angle_radians)
 
-        if angle_degrees < threshold_angle:
-            return True
+        if angle_degrees < threshold_angle or angle_degrees > -threshold_angle:
+            return angle_degrees, True
         else:
-            return False
+            return angle_degrees, False

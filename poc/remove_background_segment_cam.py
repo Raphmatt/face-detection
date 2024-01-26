@@ -20,7 +20,7 @@ with open(MODEL, 'rb') as f:
     model = f.read()
 
 
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 prevTime = 0
 
 # Create the options that will be used for ImageSegmenter
