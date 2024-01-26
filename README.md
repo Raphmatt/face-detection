@@ -34,10 +34,13 @@ Die Python FastAPI bietet zwei Schnittstellen:
 ### Parameter "image/process"
 
 | Parameter | Default | Typ | Beschreibung |
-| ------ | ------ | ------ | ------ |
+| ---- | ---- | ---- | ---- |
 | bounds | False | boolean | Erlaube sichtbare Bildkanten |
 | side_spacing | 0.72 | number | Abstand der Augen zum Bildrand <br> 0 = Augen am Rand <br> 0.9998 = Augen zentriert von weitem |
-| top_spacing | 0.4 | number | vertikale Position der Augen <br> 0 = Augen am oberen Rand <br> 0.9998 = Augen am unteren Rand|
+| top_spacing | 0.4 | number | vertikale Position der Augen <br> 0 = Augen am oberen Rand <br> 0.9998 = Augen am unteren Rand |
+| width | 512 | integer | Breite des finalen Bildes |
+| height | 640 | integer | Höhe des finalen Bildes |
+| binary_method | multiclass | string | Methode, mit welcher der Hintergrund <br> entfernt wird <br>multiclass = genauer, langsamer <br> selfie = ungenauer, schneller |
 
 ## Ablauf
 
