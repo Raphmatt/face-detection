@@ -41,7 +41,7 @@ Die Python FastAPI bietet zwei Schnittstellen:
 
 ## Ablauf
 
-Der User sendet das Bild von seinem Smartphone an den Rust Service. Dieser postet es in unserem FastAPI Service, der das Bild analysiert, bearbeitet und schließlich zurückgibt. Im Rust Service wird das finale Bild, wie gewohnt, in den Google Bucket geladen.
+Der User sendet das Bild von seinem Smartphone an den Rust Service. Dieser postet es in unserem FastAPI Service, der das Bild analysiert, bearbeitet und schliesslich zurückgibt. Im Rust Service wird das finale Bild, wie gewohnt, in den Google Bucket geladen.
 
 ### Architekturdiagramm
 
@@ -71,13 +71,14 @@ Auch im Rust Service könnte man die URL einfach auf einen anderen Service verwe
 
 ### Vorteile
 
-- Unser Service wird nur im Backend hinzugefügt. Der User muss dadurch keine Updates oder ähnliches durchführen und bekommt nichts davon mit
+- Unser Service wird nur im Backend hinzugefügt. Der User muss dadurch keine Updates oder ähnliches durchführen und bekommt nichts davon mit.
 
 - Wir verwenden keine externen Services, wie Google Vision oder AWS Rekognition, sondern führen alles lokal aus. Dadurch wird der Datenschutz der Schüler gewährleistet.
 
-- Die Performance unserer Lösung ist bereits in Ordnung, könnte jedoch leicht durch anpassen der Cloud Umgebung skaliert werden.
+- Die Performance unserer Lösung ist bereits in Ordnung, könnte jedoch leicht durch Anpassen der Cloud Umgebung skaliert werden.
 
 - Durch das Verzichten auf externe Anbieter sparen wir Kosten.
+
 
 ### Nachteile
 
@@ -85,21 +86,22 @@ Auch im Rust Service könnte man die URL einfach auf einen anderen Service verwe
 
 ## Umgesetzt
 
-- Auf dem Foto soll genau ein menschliches Gesicht erkennbar sein.
-- Das Gesicht auf dem Foto muss vollständig sichtbar sein.
-- Das Gesicht muss frontal aufgenommen sein. Der Kopf darf also in keiner Achse zu stark geneigt sein.
-- Das Gesicht darf nicht durch verdeckt sein (z.B. durch Masken, Haustiere, Sonnenbrillen, ...).
+- [x] Auf dem Foto soll genau ein menschliches Gesicht erkennbar sein.
+- [x] Das Gesicht auf dem Foto muss vollständig sichtbar sein.
+- [x] Das Gesicht muss frontal aufgenommen sein. Der Kopf darf also in keiner Achse zu stark geneigt sein.
+- [x] Das Gesicht darf nicht durch verdeckt sein (z.B. durch Masken, Haustiere, Sonnenbrillen, ...).
+
+
+## Integration ins Gesamtsystem
+
+Das Einbinden in das Gesamtsystem, wie auch im Diagramm gezeigt, ist nicht aufwändig, und die erforderlichen Code-Änderungen wurden in unserem Fork durchgeführt.
 
 ## Video
 
 _**PLACEHOLDER**_
 
-## Integration ins Gesamtsystem
-
-Das Einbinden in das Gesamtsystem, wie auch im Diagramm gezeigt, ist nicht aufwändig, und die erforderlichen Code-Änderungen wurden durchgeführt.
-
 ## Bonus
 
 Besonders stolz sind wir auf die Implementierung der Hintergrundentfernung, die ein integriertes Smoothing verwendet. Ebenso beeindruckend ist die automatische Ausrichtung des Fotos abhängig vom Winkel des Gesichts. Dabei wird auch berücksichtigt, wie weit das Gesicht von der Kamera entfernt ist, und man erhält dadurch ein einheitliches, finales Bild.
 
-Diese herausragende Lösung verdanken wir Raphael Andermatt, der dafür viel Zeit und Mühe investiert hat.
+Diese herausragende Lösung verdanken wir Raphael Andermatt (@raphmatt), der dafür viel Zeit und Mühe investiert hat.
