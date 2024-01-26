@@ -69,6 +69,21 @@ Auch im Rust Service könnte man die URL einfach auf einen anderen Service verwe
 
 ![Static Badge](https://img.shields.io/badge/FastAPI-0.105.0-darkgreen?logo=fastapi)
 
+## Designentscheid
+
+Wir haben uns dafür entschieden Mediapipe zu nutzen auf Grund der hohen Konfigurierbarkeit und der Möglichkeit zur lokalen Ausführung. Ebenfalls bietet es sich an, dass wir unsere Kenntnise über Computer Vision erweitern können und dabei noch unsere Python Skills vertiefen.
+
+Bei der Implementation in die existierende GIBZ Lösung haben wir uns drei Varianten überlegt:
+
+1. Aufruf direkt über den Mobile Client
+2. Aufruf im Rust Service
+3. Aufruf im Web-Frontend
+
+Schlussendlich haben wir uns für die **zweite** Methode entschieden aus den folgenden Gründen:
+
+- keine Updates im Mobile Client notwendig, welche eventuell schwieriger zu implementieren/deployen sein könnten
+
+- die Read- / Write-Prozesse im Google Bucket werden auf einem Minimum gehalten, da wir davon ausgehen, dass eine hohe Anzahl Requests zu höheren Kosten führen würde
 
 ## Qualität der Lösung
 
