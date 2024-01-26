@@ -49,7 +49,7 @@ with mp_face_mesh.FaceMesh(
                 continue
 
             # image = cv2.imread(
-            #    "/src/tests/testdata/angled_face_1.jpg")
+            #    "/src/tests/testdata/rotated_face_1.jpg")
 
 
             # Convert the BGR image to RGB (if your model expects RGB input)

@@ -2,7 +2,7 @@ import mediapipe as mp
 import numpy as np
 from fastapi import UploadFile, File
 
-from face_utilities import get_face_count, align_face
+from face_utilities import get_face_count, align_face, get_face_details, face_looking_straight, shoulder_angle_valid
 from image_utilities import uploadFile_2_np_image
 
 
@@ -14,6 +14,7 @@ async def process_image(
         spacing_top=0.4,
         desired_width=512,
         default_height=640,
+        binary_method="multiclass"
 
 ) -> np.ndarray:
     """
@@ -32,31 +33,45 @@ async def process_image(
         np_image = await uploadFile_2_np_image(file)
     else:
         np_image = override_file
+
     method = "mediapipe"
 
     # check the count of faces
     face_count, face_boxes = get_face_count(
         mp.Image(image_format=mp.ImageFormat.SRGB, data=np_image),
         method="mediapipe")
+
     if face_count != 1:
-        face_count, face_boxes = get_face_count(
-            mp.Image(image_format=mp.ImageFormat.SRGB, data=np_image),
-            method="dlib")
+        face_count, face_boxes = get_face_count(mp.Image(image_format=mp.ImageFormat.SRGB, data=np_image),
+                                                method="dlib")
         if face_count != 1:
             raise ValueError("Image must contain exactly one face. Current face count: " + str(face_count))
         else:
             method = "dlib"
 
-    # additional checks if the face is valid
+    face_angle, left, right = get_face_details(np_image, method=method)
 
+    if face_angle > 10:
+        raise ValueError("Face angle is too large. Current face angle: " + str(face_angle))
+
+    shoulder_angle, shoulder_angle_okay = shoulder_angle_valid(np_image)
+
+    if not shoulder_angle_okay:
+        raise ValueError("Shoulder angle is too large. Current shoulder angle: " + str(shoulder_angle))
+
+    if not face_looking_straight(np_image):
+        raise ValueError("Face is not looking straight")
 
     # align face
     final_image = align_face(
         np_image,
-        method=method,
         allow_out_of_bounds=allow_out_of_bounds,
         spacing_side=spacing_side,
         spacing_top=spacing_top,
         desired_width=desired_width,
-        desired_height=default_height)
+        desired_height=default_height,
+        face_angle=face_angle,
+        left_eye_point=left,
+        right_eye_point=right,
+        binary_method=binary_method)
     return final_image
