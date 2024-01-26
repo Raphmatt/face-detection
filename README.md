@@ -107,11 +107,11 @@ der es dann in den Bucket lädt.
 
 ### Architekturdiagramm
 
-![img](./files/ArchitectureDiagram.png){width=50%}
+![img](./files/ArchitectureDiagram.png){width=60%}
 
 ### Flowdiagramm
 
-![img](./files/FlowDiagram.png){width=10%}
+![img](./files/FlowDiagram.png){width=30%}
 
 ## Flexibilität
 
