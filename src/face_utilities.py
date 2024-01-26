@@ -26,6 +26,20 @@ def align_face(
         right_eye_point: tuple[int, int] = None,
         binary_method: str = "multiclass"
 ) -> np.ndarray:
+    """
+    Aligns a face to a desired size and eye spacing
+    :param cv_image: The input image as a numpy array.
+    :param allow_out_of_bounds: Allow the face to be out of bounds (e.g. if the face is on the edge of the image)
+    :param spacing_side: The spacing of the eye and the side edge of the image
+    :param spacing_top: The spacing of the eye and the top edge of the image
+    :param desired_width: The desired width of the aligned image
+    :param desired_height: The desired height of the aligned image
+    :param face_angle: The angle of the face (in degrees)
+    :param left_eye_point: The coordinates of the left eye
+    :param right_eye_point: The coordinates of the right eye
+    :param binary_method: The method to use for background masking. "selfie" or "multiclass"
+    :return: Returns the aligned face as a numpy array
+    """
     if face_angle is None:
         raise ValueError("No face detected.")
 
@@ -38,7 +52,7 @@ def align_face(
                                                         .align(cv_image, left_eye_point, right_eye_point))
 
     if out_of_bounds and not allow_out_of_bounds:
-        raise ValueError("Face is out of bounds. (The face is too close to the edge of the image.)")
+        raise ValueError("Face is out of bounds.")
 
     binary_mask = get_binary_mask(mp.Image(mp.ImageFormat.SRGB, aligned_image), method=binary_method)
     _, binary_mask = cv2.threshold(cv2.cvtColor(binary_mask, cv2.COLOR_BGR2GRAY), 200, 255, cv2.THRESH_BINARY_INV)
