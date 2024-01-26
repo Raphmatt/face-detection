@@ -116,7 +116,7 @@ Das Einbinden in das Gesamtsystem, wie auch im Diagramm gezeigt, ist nicht aufw√
 
 ## Video
 
-_**PLACEHOLDER**_
+![video](./files/recording.mp4){width=60%}
 
 ## Bonus
 
