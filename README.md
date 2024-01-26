@@ -112,7 +112,7 @@ Schlussendlich haben wir uns für die **zweite** Methode entschieden aus den fol
 
 ## Integration ins Gesamtsystem
 
-Das Einbinden in das Gesamtsystem, wie auch im Diagramm gezeigt, ist nicht aufwändig, und die erforderlichen Code-Änderungen wurden in unserem Fork durchgeführt.
+Das Einbinden in das Gesamtsystem, wie auch im Diagramm gezeigt, ist nicht aufwändig, und die erforderlichen Code-Änderungen wurden in [unserem Fork](https://gitlab.com/GIBZ/students/infa3a2023/profile-picture-server/-/tree/gipeFix?ref_type=heads) durchgeführt.
 
 ## Video
 
