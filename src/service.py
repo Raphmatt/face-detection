@@ -11,8 +11,23 @@ async def process_image(
         override_file=None,
         allow_out_of_bounds=False,
         spacing_side=0.72,
-        spacing_top=0.4
+        spacing_top=0.4,
+        desired_width=512,
+        default_height=640,
+
 ) -> np.ndarray:
+    """
+    Processes an image and returns the aligned face.
+
+    :param file: UploadFile from FastAPI
+    :param override_file: If UploadFile is not used, this can be used to pass a numpy array directly (for manual testing
+    :param allow_out_of_bounds: Allow the face to be out of bounds (e.g. if the face is on the edge of the image)
+    :param spacing_side: The spacing of the eye and the sid edge of the image
+    :param spacing_top: The spacing of the eye and the top edge of the image
+    :param desired_width: The desired width of the final image
+    :param default_height: The desired height of the final image
+    :return: Returns the aligned face as a numpy array
+    """
     if override_file is None:
         np_image = await uploadFile_2_np_image(file)
     else:
@@ -41,5 +56,7 @@ async def process_image(
         method=method,
         allow_out_of_bounds=allow_out_of_bounds,
         spacing_side=spacing_side,
-        spacing_top=spacing_top)
+        spacing_top=spacing_top,
+        desired_width=desired_width,
+        desired_height=default_height)
     return final_image
