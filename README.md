@@ -122,6 +122,8 @@ Auch im Rust Service könnte man die URL einfach auf einen anderen Service verwe
 
 ![Static Badge](https://img.shields.io/badge/Mediapipe-0.10.8-lightblue?logo=google)
 
+![Static Badge](https://img.shields.io/badge/dlib-19.24.2-green?logo=dlib)
+
 ![Static Badge](https://img.shields.io/badge/FastAPI-0.105.0-darkgreen?logo=fastapi)
 
 
@@ -129,26 +131,22 @@ Auch im Rust Service könnte man die URL einfach auf einen anderen Service verwe
 
 ### Vorteile
 
-1. Serverseitige Updates => Benutzer müssen nichts unternehmen.
-2. Skalierbarkeit
-3. Austauschbarkeit des Models => Das Model kann mit den vielen Schülerdaten verbessert werden.
-4. Es können spezifische Funktionen implementiert werden.
-5. Unabhängig von Drittanbietern
-6. Datenschutz durch eigenes Verwalten
-7. Integration ins Vorhandene
+- Unser Service wird nur im Backend hinzugefügt. Der User muss dadurch keine Updates oder ähnliches durchführen und bekommt nichts davon mit
+
+- Wir verwenden keine externen Services, wie Google Vision oder AWS Rekognition, sondern führen alles lokal aus. Dadurch wird der Datenschutz der Schüler gewährleistet.
+
+- Die Performance unserer Lösung ist bereits in Ordnung, könnte jedoch leicht durch anpassen der Cloud Umgebung skaliert werden.
+
+- Durch das Verzichten auf externe Anbieter sparen wir Kosten.
 
 ### Nachteile
 
-1. Fachwissen
-2. Nur so gut wie auch programmiert
+- Wir mussten sehr viel Zeit in das lernen von Computer Vision und die eigentliche Implementation investieren. Dies wäre durch das verwenden eines externen Services sicher leichter gefallen.
+
 
 ## Video
 
-Video kommt noch.
-
-## Umgesetztes
-
-Kommt noch
+_**PLACEHOLDER**_
 
 ## Integration ins Gesamtsystem
 
@@ -156,6 +154,6 @@ Das Einbinden in das Gesamtsystem, wie auch im Diagramm gezeigt, ist nicht aufw�
 
 ## Bonus
 
-Im Vergleich zu den anderen Teams ist dieses Projekt die einzige On-Premise-Lösung.<br />
-Neben dem umgesetzten Projekt wurde auch viel ausprobiert, wie zum Beispiel das Trainieren eines eigenen Models.<br />
-Die Integration unserer Erweiterung ist sehr einfach.
+Besonders stolz sind wir auf die Implementierung der Hintergrundentfernung, die ein integriertes Smoothing verwendet. Ebenso beeindruckend ist die automatische Ausrichtung des Fotos abhängig vom Winkel des Gesichts. Dabei wird auch berücksichtigt, wie weit das Gesicht von der Kamera entfernt ist, und man erhält dadurch ein einheitliches, finales Bild.
+
+Diese herausragende Lösung verdanken wir Raphael Andermatt, der dafür viel Zeit und Mühe investiert hat.
