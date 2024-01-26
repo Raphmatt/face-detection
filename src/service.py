@@ -1,12 +1,6 @@
-import math
-import os
-
-import cv2
 import mediapipe as mp
 import numpy as np
 from fastapi import UploadFile, File
-from mediapipe.tasks import python
-from mediapipe.tasks.python import vision
 
 from face_utilities import get_face_count, align_face
 from image_utilities import uploadFile_2_np_image
@@ -15,7 +9,10 @@ from image_utilities import uploadFile_2_np_image
 async def process_image(
         file: UploadFile = File(...),
         override_file=None,
-        allow_out_of_bounds=False) -> np.ndarray:
+        allow_out_of_bounds=False,
+        spacing_side=0.72,
+        spacing_top=0.4
+) -> np.ndarray:
     if override_file is None:
         np_image = await uploadFile_2_np_image(file)
     else:
@@ -42,6 +39,7 @@ async def process_image(
     final_image = align_face(
         np_image,
         method=method,
-        allow_out_of_bounds=allow_out_of_bounds)
-
+        allow_out_of_bounds=allow_out_of_bounds,
+        spacing_side=spacing_side,
+        spacing_top=spacing_top)
     return final_image
