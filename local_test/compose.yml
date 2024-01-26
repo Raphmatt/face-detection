@@ -1,6 +1,6 @@
 services:
   profile-picture:
-    image: registry.gitlab.com/gibz/students/infa3a2023/profile-picture-server:gipeFix
+    image: registry.gitlab.com/gibz/students/infa3a2023/face-detection:rustService
     container_name: profile-picture
     env_file: .env
     environment:
@@ -13,6 +13,13 @@ services:
       - ./google-cloud-credentials.json:/app/google-cloud-credentials.json:ro
     depends_on:
       - db
+
+  face-detection:
+    image: registry.gitlab.com/gibz/students/infa3a2023/face-detection:versuch
+    ports:
+      - 8000:8000
+    networks:
+      - gibzapp
 
   db:
     image: mysql:8
