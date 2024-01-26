@@ -6,7 +6,7 @@ import pytest
 import numpy as np
 
 from src.face_utilities import get_face_count, get_binary_mask, get_face_details
-from src.service import shoulder_angle_valid
+from src.face_utilities import shoulder_angle_valid
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 testdata_path = os.path.join(current_dir, "testdata")

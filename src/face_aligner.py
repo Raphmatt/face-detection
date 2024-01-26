@@ -15,7 +15,7 @@ class FaceAligner:
         """
         # store the desired output left
         # eye position, and desired output face width + height
-        self.desiredLeftEye = eye_spacing
+        self.desiredLeftEye = (eye_spacing[0], eye_spacing[1])
         self.desiredWidth = desired_width
         self.desiredHeight = desired_height
 
