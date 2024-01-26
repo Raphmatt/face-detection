@@ -19,14 +19,20 @@ async def heartbeat():
 @router.post("/image/process")
 async def process_image(
         file: UploadFile = File(...),
-        bounds: bool = Query(False, alias="allow ouf of bounds"),
-        spacing_side: float = Query(0.72, alias="spacing side (0 = edge, 0.99998 = middle)"),
-        spacing_top: float = Query(0.4,
-                                   alias="spacing top (0 = top edge, 0.99998 = bottom edge, 0.5 = middle)"),
+        bounds: bool = Query(False, alias="bounds", description="Allow out of bounds processing (True/False)"),
+        spacing_side: float = Query(0.72, alias="side_spacing", description="Spacing on the side (0 = edge, 0.99998 = middle)"),
+        spacing_top: float = Query(0.4, alias="top_spacing", description="Spacing on the top (0 = top edge, 0.99998 = bottom edge, 0.5 = middle)"),
+        desired_width: int = Query(512, alias="width", description="Desired width of the final image"),
+        default_height: int = Query(640, alias="height", description="Desired height of the final image")
 ):
     try:
-        image_array = await service.process_image(file, allow_out_of_bounds=bounds, spacing_side=spacing_side,
-                                                  spacing_top=spacing_top)
+        image_array = await service.process_image(
+            file,
+            allow_out_of_bounds=bounds,
+            spacing_side=spacing_side,
+            spacing_top=spacing_top,
+            desired_width=desired_width,
+            default_height=default_height)
 
         # Ensure the NumPy array is in the correct format (e.g., uint8)
         if image_array.dtype != np.uint8:

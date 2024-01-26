@@ -19,7 +19,10 @@ def align_face(
         method: str = 'mediapipe',
         allow_out_of_bounds: bool = False,
         spacing_side: float = 0.72,
-        spacing_top: float = 0.4
+        spacing_top: float = 0.4,
+        desired_width: int = 512,
+        desired_height: int = 640,
+
 ) -> np.ndarray:
     # Convert the BGR image to RGB (if your model expects RGB input)
     image_rgb = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
@@ -34,8 +37,8 @@ def align_face(
     # Align the face
     aligned_image, out_of_bounds, rgba_aligned_image = (FaceAligner(
         eye_spacing=eye_spacing,
-        desired_width=512,
-        desired_height=640)
+        desired_width=desired_width,
+        desired_height=desired_height)
                                                         .align(cv_image, left, right))
 
     if out_of_bounds and not allow_out_of_bounds:
