@@ -1,6 +1,6 @@
-# face detection
+# pfp validator
 
-## Einrichtung
+## Setup
 
 1. Klonen Sie das Projekt auf Ihren Rechner.
 
@@ -101,9 +101,7 @@ Die Python FastAPI bietet zwei Schnittstellen:
 
 ## Ablauf
 
-Der Rust Service sendet das Bild vor dem Hochladen in den Google Bucket an die FastAPI.<br />
-Die FastAPI validiert und verarbeitet das Bild, gibt es dem Rust Service zurück,<br />
-der es dann in den Bucket lädt.
+Der User sendet das Bild von seinem Smartphone an den Rust Service. Dieser postet es in unserem FastAPI Service, der das Bild analysiert, bearbeitet und schließlich zurückgibt. Im Rust Service wird das finale Bild, wie gewohnt, in den Google Bucket geladen.
 
 ### Architekturdiagramm
 
@@ -115,12 +113,17 @@ der es dann in den Bucket lädt.
 
 ## Flexibilität
 
-Die Logik zur Bildverarbeitung ist in kleinere Funktionen aufgeteilt.<br />
-Diese Funktionen können leicht ausgetauscht werden, solange sich das Rückgabeformat nicht ändert.
+In unserem Projekt wurden die einzelnen Schritte der Bildbearbeitung in verschiedene Funktionen aufgeteilt. Dadurch können sie leicht ausgetauscht oder erweitert werden. 
 
-## Systemkomponenten
+Auch im Rust Service könnte man die URL einfach auf einen anderen Service verweisen, solange sich die Parameter und das Rückgabeformat nicht ändern.
 
-In diesem Projekt ist das Model von Mediapipe die einzige Systemkomponente.
+## Systemkomponenten / Frameworks
+
+
+![Static Badge](https://img.shields.io/badge/Mediapipe-0.10.8-lightblue?logo=google)
+
+![Static Badge](https://img.shields.io/badge/FastAPI-0.105.0-darkgreen?logo=fastapi)
+
 
 ## Qualität der Lösung
 
