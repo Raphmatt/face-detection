@@ -16,55 +16,6 @@
 
 3. Öffnen Sie die Swagger-Seite [docs](http://localhost:8000/docs).
 
-# Todo
-
-- [x] Docker
-  - [x] Dockerfile
-  - [x] docker-compose.yml
-- [ ] API
-  - [ ] FastAPI Functionality
-    - [x] Human Face detection
-      - [x] Face count detection
-    - [ ] Face visibility
-      - [ ] Face looking towards
-        - [x] Detect face angle
-        - [ ] Adjust face angle / threshold for face angle
-      - [ ] Shoulder angle
-        - [x] Detect shoulder angle
-        - [ ] threshold for shoulder angle
-      - [ ] Face visible from the front (WIP Pacal)
-        - [ ] Detect face horizontal angle
-        - [ ] threshold for face horizontal angle
-      - [ ] Face not occluded by an object (Tricky task, tried with facemesh, but occlusion cannot be detected)
-        - [ ] Detect occlusion
-    - [x] Image optimization
-      - [x] Remove background
-        - [x] Get mask of background
-        - [x] Remove background
-      - [x] Uniform cropping to the face (WIP Raphael)
-        - [x] Detect face position
-        - [x] Crop image to face position
-        - [x] Resize image to uniform size
-        - [x] Rotate image to uniform angle
-      - [x] Uniform aspect ratio (WIP Raphael)
-        - [x] Apply uniform aspect ratio
-      - [x] Constant, absolute dimensions (e.g. 500x500px) 
-        - [x] Scale image to constant, absolute dimensions
-
-
-# Requirements:
-
-- Validation
-  - Is a human face visible in the image?
-  - Is the face completely visible?
-  - Is the face visible from the front and not at an angle or from the side?
-  - Is the face not occluded by an object? (e.g. Mask, Pet, Sunglasses, etc.)
-- Optimization
-  - Remove the background, so that the person is shown in front of a transparent background.
-  - Uniform cropping of the image, so that all faces are shown in the same size, orientation and position.
-  - The resulting image should be saved in a uniform aspect ratio with constant, absolute dimensions.
-- Additional
-  - Is the person a celebrity?
 
 ## Original Requirements
 
@@ -94,7 +45,7 @@ Alle Profilbilder sollen einen uniformen Zuschnitt erfahren, damit die fotografi
 
 Die Python FastAPI bietet zwei Schnittstellen:
 
-| Request-Typ | Request-Pfad       | Request-Body     | Beschreibung                           |
+| Request-Typ | Pfad       | Body     | Beschreibung |
 |-------------|--------------------|------------------|----------------------------------------|
 | **GET**     | /heartbeat         | Keine Parameter  | Gibt den Status des Services zurück    |
 | **POST**    | /image/process     | Ein .png-Bild    | Verarbeitet das Bild und sendet es zurück|
