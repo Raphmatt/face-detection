@@ -36,15 +36,42 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements-docker.txt,target=requirements-docker.txt \
     python -m pip install -r requirements-docker.txt
 # install libgl
+
+# Set the working directory in the container
+WORKDIR /usr/src/app
+
+# Install necessary libraries for Dlib
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    wget \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libpng-dev \
+    libopenblas-dev \
+    liblapack-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Clone Dlib repo (you can also change this to a specific version if needed)
+RUN git clone https://github.com/davisking/dlib.git
+WORKDIR /usr/src/app/dlib
+
+# Build Dlib
+RUN python setup.py install
+
+# Switch back to the main working directory
+WORKDIR /usr/src/app
+
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
       bzip2 \
       g++ \
-      git \
       graphviz \
       libgl1-mesa-glx \
       libhdf5-dev \
       openmpi-bin \
-      wget \
       python3-tk && \
     rm -rf /var/lib/apt/lists/*
 
