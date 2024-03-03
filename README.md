@@ -116,7 +116,7 @@ Das Einbinden in das Gesamtsystem, wie auch im Diagramm gezeigt, ist nicht aufw√
 
 ## Video
 
-![video](./files/recording.mp4){width=60%}
+https://github.com/Raphmatt/face-detection/assets/71792812/2c9d941f-e80d-4973-95be-1a36a9904cf2
 
 ## Bonus
 
