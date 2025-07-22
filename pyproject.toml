@@ -1,0 +1,23 @@
+[project]
+name = "face-detection"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi~=0.105.0",
+    "mediapipe~=0.10.8",
+    "numpy~=1.26.2",
+    "pillow~=10.1.0",
+    "pytest~=7.4.3",
+    "uvicorn~=0.24.0.post1",
+    "opencv-contrib-python-headless-rolling~=5.0.0.20221015",
+    "python-multipart~=0.0.6",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.uv]
+dev-dependencies = ["dlib>=19.24.6", "pytest~=7.4.3"]
