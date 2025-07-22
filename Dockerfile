@@ -5,10 +5,10 @@
 # https://docs.docker.com/engine/reference/builder/
 
 ARG PYTHON_VERSION=3.11.6
-FROM python:${PYTHON_VERSION}-slim as base
+FROM python:${PYTHON_VERSION}-slim
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# Prevents Python from writing pyc files.
-ENV PYTHONDONTWRITEBYTECODE=1
+ENV UV_COMPILE_BYTECODE=1
 
 # Keeps Python from buffering stdout and stderr to avoid situations where
 # the application crashes without emitting any logs due to buffering.
@@ -16,31 +16,7 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Create a non-privileged user that the app will run under.
-# See https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user
-#ARG UID=10001
-#RUN adduser \
-#    --disabled-password \
-#    --gecos "" \
-#    --home "/nonexistent" \
-#    --no-create-home \
-#    --uid "${UID}" \
-#    appuser
-#    --shell "/sbin/nologin" \
-
-# Download dependencies as a separate step to take advantage of Docker's caching.
-# Leverage a cache mount to /root/.cache/pip to speed up subsequent builds.
-# Leverage a bind mount to requirements.txt to avoid having to copy them into
-# into this layer.
-RUN --mount=type=cache,target=/root/.cache/pip \
-    --mount=type=bind,source=requirements-docker.txt,target=requirements-docker.txt \
-    python -m pip install -r requirements-docker.txt
-# install libgl
-
-# Set the working directory in the container
-WORKDIR /usr/src/app
-
-# Install necessary libraries for Dlib
+# Install necessary libraries for dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
@@ -52,39 +28,37 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libopenblas-dev \
     liblapack-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# Clone Dlib repo (you can also change this to a specific version if needed)
-RUN git clone https://github.com/davisking/dlib.git
-WORKDIR /usr/src/app/dlib
-
-# Build Dlib
-RUN python setup.py install
-
-# Switch back to the main working directory
-WORKDIR /usr/src/app
-
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-      bzip2 \
-      g++ \
-      graphviz \
-      libgl1-mesa-glx \
-      libhdf5-dev \
-      openmpi-bin \
-      python3-tk && \
+    bzip2 \
+    g++ \
+    graphviz \
+    libgl1-mesa-glx \
+    libhdf5-dev \
+    openmpi-bin \
+    python3-tk && \
     rm -rf /var/lib/apt/lists/*
 
-# Switch to the non-privileged user to run the application.
-#USER appuser
+# Clone and build Dlib
+RUN git clone https://github.com/davisking/dlib.git
+WORKDIR /usr/src/app/dlib
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install .
 
-# Copy the source code into the container.
+WORKDIR /usr/src/app
+
+# Install dependencies using uv and pyproject.toml
+# Leverage a cache mount to speed up subsequent builds
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --frozen --no-install-project --no-editable
+
+# Switch back to the main working directory
+
+# Copy the source code into the container
 COPY . .
 
-# Expose the port that the application listens on.
+# Expose the port that the application listens on
 EXPOSE 8000
 
-# Run the application.
-#CMD python src/main.py
+# Run the application
 CMD cd src && uvicorn app:app --host 0.0.0.0 --port 8000
-#CMD ["uvicorn", "src/app.main:app", "--host", "0.0.0.0", "--port", "80"]
