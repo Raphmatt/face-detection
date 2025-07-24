@@ -4,11 +4,11 @@
 
 Server‑side **FastAPI** micro‑service that **validates** and **optimises** user‑uploaded profile photos. It detects faces, checks pose & occlusions, removes the background, aligns the face to a uniform template and streams back a transparent PNG.
 
-> **Context** Created for the Swiss VET module **M321 – “Verteilte Systeme programmieren”** (GIBZ). Goal: design, build, test & integrate an independent service into an existing distributed backend (mobile → Rust → GCS).
+> **Context** Created for the Swiss VET module **M321 – "Verteilte Systeme programmieren"** (GIBZ). Goal: design, build, test & integrate an independent service into an existing distributed backend (mobile → Rust → GCS).
 
 ---
 
-## 1 · Project Brief (assignment summary)
+## 1 - Project Brief (assignment summary)
 
 **Objective** Add automated _content validation_ and _optimisation_ for profile photos stored in Google Cloud.
 
@@ -28,25 +28,41 @@ Additional deliverables: architecture & flow diagrams, design‑decision notes, 
 
 ---
 
-## 2 · Core Capabilities
+## 2 - Core Capabilities
 
-| Phase            | What happens                                                              | Tech                                      |
-| ---------------- | ------------------------------------------------------------------------- | ----------------------------------------- |
-| **Validation**   | Reject if rule fails: face≠1 · not frontal · occlusion · shoulders tilted | MediaPipe FaceMesh & Pose + dlib fallback |
-| **Optimisation** | Rotate/scale to template · crop to fixed W×H · transparent PNG            | Custom `FaceAligner`, MediaPipe Segmenter |
-| **Delivery**     | Stream PNG to caller                                                      | FastAPI                                   |
-
----
-
-## 3 · Tech Stack
-
-Python 3.11 · FastAPI 0.105 · Uvicorn
-**MediaPipe** 0.10 · **dlib** 19.24 · NumPy 1.26 · OpenCV‑headless · Pillow 10
-PyTest 7.4 (\~85 % coverage) · Docker & Compose · GitLab CI
+| Phase            | What happens                                                           | Tech                                      |
+| ---------------- | ---------------------------------------------------------------------- | ----------------------------------------- |
+| **Validation**   | Reject if rule fails: face≠1, not frontal, occlusion, shoulders tilted | MediaPipe FaceMesh & Pose + dlib fallback |
+| **Optimisation** | Rotate/scale to template, crop to fixed W×H, transparent PNG           | Custom `FaceAligner`, MediaPipe Segmenter |
+| **Delivery**     | Stream PNG to caller                                                   | FastAPI                                   |
 
 ---
 
-## 4 · Repository Layout
+## 3 - Tech Stack
+
+**Core Technologies:**
+
+- Python 3.11
+- FastAPI 0.105
+- Uvicorn
+
+**ML & Computer Vision:**
+
+- **MediaPipe** 0.10
+- **dlib** 19.24
+- NumPy 1.26
+- OpenCV‑headless
+- Pillow 10
+
+**Development & Deployment:**
+
+- PyTest 7.4 (~85% coverage)
+- Docker & Compose
+- GitLab CI
+
+---
+
+## 4 - Repository Layout
 
 ```
 src/
@@ -63,7 +79,7 @@ Dockerfile, compose.yaml, .gitlab-ci.yml
 
 ---
 
-## 5 · Run & Test
+## 5 - Run & Test
 
 ```bash
 # Docker (recommended)
@@ -80,7 +96,7 @@ pytest -q
 
 ---
 
-## 5.5 · ML Model Downloads
+## 5.5 - ML Model Downloads
 
 This project uses pre-trained models from MediaPipe and dlib. The models are currently stored in the repository, but
 can be downloaded from their original sources:
@@ -170,7 +186,7 @@ bunzip2 src/models/dlib_models/shape_predictor_68_face_landmarks.dat.bz2
 
 ---
 
-## 6 · HTTP API
+## 6 - HTTP API
 
 ### `GET /heartbeat`
 
@@ -193,7 +209,7 @@ Multipart upload with `file=<image>` and query params:
 
 ---
 
-## 7 · Processing Pipeline (high‑level)
+## 7 - Processing Pipeline (high‑level)
 
 ```mermaid
 flowchart TB
@@ -208,7 +224,7 @@ flowchart TB
 
 ---
 
-## 8 · Design Highlights
+## 8 - Design Highlights
 
 - Local CV models → privacy, zero vendor cost.
 - Rust backend integration → no mobile‑app changes, minimal GCS writes.
@@ -218,7 +234,7 @@ flowchart TB
 
 ---
 
-## 9 · Module M321 Scoring
+## 9 - Module M321 Scoring
 
 | #         | Criterion                  | Max    | **Achieved** |
 | --------- | -------------------------- | ------ | ------------ |
@@ -238,12 +254,12 @@ _Table reproduced from the official assessment sheet._ Grading rule: **TOTAL −
 
 ---
 
-## 10 · Credits 🏆
+## 10 - Credits 🏆
 
-Major components—MediaPipe integration, face‑alignment pipeline, overall architecture were developed by **Raphael Andermatt ([@raphmatt](https://github.com/raphmatt))**. Thanks to Team 3 colleagues (Pascal Bitterli, Emre Ceylan, Arjanis Kovani) for testing, docs & DevOps.
+Major components: MediaPipe integration, face‑alignment pipeline, overall architecture were developed by **Raphael Andermatt ([@raphmatt](https://github.com/raphmatt))**. Thanks to Team 3 colleagues (Pascal Bitterli, Emre Ceylan, Arjanis Kovani) for testing, docs & DevOps.
 
 ---
 
-## 11 · License
+## 11 - License
 
 MIT – Fork & adapt as needed.
