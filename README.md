@@ -84,6 +84,7 @@ pytest -q
 
 This project uses pre-trained models from MediaPipe and dlib. The models are currently stored in the repository, but
 can be downloaded from their original sources:
+add the two missing models which are already in the script the desription below.
 
 ### MediaPipe Models
 
@@ -110,6 +111,22 @@ can be downloaded from their original sources:
   Landmarker](https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker#models)
 - **Model Card**: [BlazePose GHUM 3D Model
   Card](https://storage.googleapis.com/mediapipe-assets/Model%20Card%20BlazePose%20GHUM%203D.pdf)
+
+#### Selfie Multiclass Segmentation
+
+- **Purpose**: Multi-class image segmentation for people, identifying hair, skin, clothes, and accessories
+- **Output Categories**: 0-background, 1-hair, 2-body-skin, 3-face-skin, 4-clothes, 5-others (accessories)
+- **Input**: 256 x 256, float32
+- **Download**: [`selfie_multiclass_256x256.tflite`](https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/latest/selfie_multiclass_256x256.tflite)
+- **Model Card**: [Multiclass Segmentation Model Card](https://storage.googleapis.com/mediapipe-assets/Model%20Card%20Multiclass%20Segmentation.pdf)
+
+#### Selfie Segmentation (Square)
+
+- **Purpose**: Portrait segmentation for background replacement and modification
+- **Output Categories**: 0-background, 1-person
+- **Input**: 256 x 256, float16
+- **Download**: [`selfie_segmenter.tflite`](https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite)
+- **Model Card**: [Selfie Segmentation Model Card](https://storage.googleapis.com/mediapipe-assets/Model%20Card%20MediaPipe%20Selfie%20Segmentation.pdf)
 
 ### dlib Models
 
