@@ -122,6 +122,7 @@ can be downloaded from their original sources:
 # Create model directories
 mkdir -p src/models/mp_models/face_detection
 mkdir -p src/models/mp_models/pose_detection
+mkdir -p src/models/mp_models/segmentation
 mkdir -p src/models/dlib_models
 
 # Download BlazeFace (Short-Range)
@@ -131,6 +132,14 @@ curl -L "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_fac
 # Download Pose Landmarker (Lite)
 curl -L "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task" \
   -o src/models/mp_models/pose_detection/pose_landmarker_lite.task
+
+# Download MediaPipe Selfie Multiclass Segmentation model
+curl -L "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/latest/selfie_multiclass_256x256.tflite" \
+  -o src/models/mp_models/segmentation/selfie_multiclass_256x256.tflite
+
+# Download MediaPipe Selfie Segmentation model (square)
+curl -L "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/latest/selfie_segmenter.tflite" \
+  -o src/models/mp_models/segmentation/square_selfie_segmenter.tflite
 
 # Download dlib shape predictor (compressed)
 curl -L "https://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2" \
