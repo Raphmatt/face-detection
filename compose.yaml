@@ -13,5 +13,3 @@ services:
       context: .
     ports:
       - 8001:8000
-    environment:
-      - PYTHONPATH=/usr/src/app
