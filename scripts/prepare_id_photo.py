@@ -36,15 +36,11 @@ class StandardSpec:
     width: int  # Final image width in pixels
     height: int  # Final image height in pixels
     eye_y_from_bottom_pct: float  # Eyes' horizontal line as % of final image height from bottom (e.g., 55.0)
-    pupil_dist_pct_of_width: (
-        float  # Pupil-to-pupil distance as % of final image width
-    )
+    pupil_dist_pct_of_width: float  # Pupil-to-pupil distance as % of final image width
     horiz_center_pct: float = 50.0  # Where to place eye midpoint horizontally in final image (0-100), default center
 
     def clamp(self) -> "StandardSpec":
-        self.eye_y_from_bottom_pct = float(
-            np.clip(self.eye_y_from_bottom_pct, 0, 100)
-        )
+        self.eye_y_from_bottom_pct = float(np.clip(self.eye_y_from_bottom_pct, 0, 100))
         self.pupil_dist_pct_of_width = float(
             np.clip(self.pupil_dist_pct_of_width, 1, 99)
         )
@@ -190,9 +186,7 @@ def prompt_overwrite(path: Path) -> Optional[Path]:
 
 
 def load_image_bgr(path: Path) -> np.ndarray:
-    data = cv2.imdecode(
-        np.fromfile(str(path), dtype=np.uint8), cv2.IMREAD_COLOR
-    )
+    data = cv2.imdecode(np.fromfile(str(path), dtype=np.uint8), cv2.IMREAD_COLOR)
     if data is None:
         raise ValueError(f"Failed to read image: {path}")
     return data
@@ -219,10 +213,7 @@ def save_jpeg_with_target_size(
         subsampling=0,
     )
     size = buf.tell()
-    if (
-        abs(size - target_bytes) <= tol_bytes
-        or size <= target_bytes + tol_bytes
-    ):
+    if abs(size - target_bytes) <= tol_bytes or size <= target_bytes + tol_bytes:
         best_buf = buf
     else:
         # Binary search to approach target size from above without going too low
@@ -359,9 +350,7 @@ def crop_final(
     bgr: np.ndarray, spec: StandardSpec, eye_center_scaled: Tuple[float, float]
 ) -> np.ndarray:
     final_w, final_h = spec.width, spec.height
-    desired_eye_y_from_top = (
-        final_h - (spec.eye_y_from_bottom_pct / 100.0) * final_h
-    )
+    desired_eye_y_from_top = final_h - (spec.eye_y_from_bottom_pct / 100.0) * final_h
     desired_eye_x = (spec.horiz_center_pct / 100.0) * final_w
 
     # Determine crop top-left so that eye_center lands at (desired_eye_x, desired_eye_y_from_top)
@@ -419,9 +408,7 @@ def process_image_to_standard(
     current_eye_dist = np.hypot(right_r[0] - left_r[0], right_r[1] - left_r[1])
     desired_eye_dist_px = (spec.pupil_dist_pct_of_width / 100.0) * spec.width
     if current_eye_dist < 1e-6:
-        raise ValueError(
-            "Detected eye distance is too small to scale reliably."
-        )
+        raise ValueError("Detected eye distance is too small to scale reliably.")
     scale = desired_eye_dist_px / current_eye_dist
 
     scaled = scale_image(rotated, scale)
@@ -470,9 +457,7 @@ def main():
         out_path = new_path
 
     try:
-        final_rgb = process_image_to_standard(
-            inp, spec, max_tilt_deg=args.max_tilt_deg
-        )
+        final_rgb = process_image_to_standard(inp, spec, max_tilt_deg=args.max_tilt_deg)
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)

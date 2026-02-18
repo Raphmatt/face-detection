@@ -18,13 +18,15 @@ import numpy as np
 from typing import Optional
 
 # Add src directory to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
 try:
     import mediapipe as mp
 except ImportError as e:
     print(f"Error importing modules: {e}")
-    print("Make sure you're running this from the face-detection project root directory")
+    print(
+        "Make sure you're running this from the face-detection project root directory"
+    )
     sys.exit(1)
 
 
@@ -43,13 +45,13 @@ async def process_frame_simple_alignment(frame: np.ndarray) -> Optional[np.ndarr
         # Simple face alignment without validation or background removal
         eye_spacing = (0.36, 0.4)  # spacing_side/2, spacing_top
         aligner = FaceAligner(
-            eye_spacing=eye_spacing,
-            desired_width=512,
-            desired_height=640
+            eye_spacing=eye_spacing, desired_width=512, desired_height=640
         )
 
         # Just align the face - no background processing
-        aligned_image, out_of_bounds, rgba_aligned_image = aligner.align(frame, left, right)
+        aligned_image, out_of_bounds, rgba_aligned_image = aligner.align(
+            frame, left, right
+        )
 
         return aligned_image
 
@@ -58,34 +60,60 @@ async def process_frame_simple_alignment(frame: np.ndarray) -> Optional[np.ndarr
         return None
 
 
-def draw_info_overlay(frame: np.ndarray, fps: float, error_msg: str = None) -> np.ndarray:
+def draw_info_overlay(
+    frame: np.ndarray, fps: float, error_msg: str = None
+) -> np.ndarray:
     """Draw FPS and status information on the frame"""
     overlay = frame.copy()
 
     # FPS counter
-    cv2.putText(overlay, f'FPS: {int(fps)}', (10, 30),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+    cv2.putText(
+        overlay,
+        f"FPS: {int(fps)}",
+        (10, 30),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.7,
+        (0, 255, 0),
+        2,
+    )
 
     # Error message if any
     if error_msg:
-        cv2.putText(overlay, f'Error: {error_msg}', (10, 60),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+        cv2.putText(
+            overlay,
+            f"Error: {error_msg}",
+            (10, 60),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            (0, 0, 255),
+            1,
+        )
 
     # Instructions
-    cv2.putText(overlay, 'ESC: Exit', (10, frame.shape[0] - 10),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+    cv2.putText(
+        overlay,
+        "ESC: Exit",
+        (10, frame.shape[0] - 10),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.5,
+        (255, 255, 255),
+        1,
+    )
 
     return overlay
 
 
 async def main():
-    parser = argparse.ArgumentParser(description='Real-time face correction demo')
-    parser.add_argument('--camera', type=int, default=0,
-                        help='Camera index (default: 0)')
-    parser.add_argument('--width', type=int, default=640,
-                        help='Camera width (default: 640)')
-    parser.add_argument('--height', type=int, default=480,
-                        help='Camera height (default: 480)')
+    parser = argparse.ArgumentParser(description="Real-time face correction demo")
+    parser.add_argument(
+        "--camera", type=int, default=0, help="Camera index (default: 0)"
+    )
+    parser.add_argument(
+        "--width", type=int, default=640, help="Camera width (default: 640)"
+    )
+    parser.add_argument(
+        "--height", type=int, default=480, help="Camera height (default: 480)"
+    )
 
     args = parser.parse_args()
 
@@ -144,8 +172,13 @@ async def main():
                 # Pad processed frame if it's narrower
                 pad_width = frame.shape[1] - w_processed
                 processed_padded = cv2.copyMakeBorder(
-                    processed_resized, 0, 0, 0, pad_width,
-                    cv2.BORDER_CONSTANT, value=(0, 0, 0)
+                    processed_resized,
+                    0,
+                    0,
+                    0,
+                    pad_width,
+                    cv2.BORDER_CONSTANT,
+                    value=(0, 0, 0),
                 )
                 display_frame = np.hstack([frame, processed_padded])
             else:
@@ -161,7 +194,7 @@ async def main():
         display_frame = draw_info_overlay(display_frame, fps, error_msg)
 
         # Display the frame
-        cv2.imshow('Face Correction Demo - Original | Processed', display_frame)
+        cv2.imshow("Face Correction Demo - Original | Processed", display_frame)
 
         # Check for exit
         key = cv2.waitKey(1) & 0xFF
@@ -175,4 +208,5 @@ async def main():
 
 if __name__ == "__main__":
     import asyncio
+
     asyncio.run(main())
