@@ -1,5 +1,5 @@
 import os
-from typing import Any, Tuple
+from typing import Any
 
 import dlib
 import cv2
@@ -133,8 +133,6 @@ def get_face_count(mp_image: mp.Image, method: str = "mediapipe") -> tuple[int, 
             "dlib_models",
             "shape_predictor_68_face_landmarks.dat"
         )
-        predictor = dlib.shape_predictor(model_path)
-
         # Convert the image to grayscale
         gray = cv2.cvtColor(mp_image.numpy_view(), cv2.COLOR_BGR2GRAY)
 
@@ -334,7 +332,6 @@ def get_binary_mask(mp_image: mp.Image, method: str = "selfie") -> ndarray[Any, 
             category_mask = segmentation_result.category_mask
 
             # Select only the hair category (usually represented by index 1)
-            condition_background = (category_mask.numpy_view() == 0)
             condition_hair = (category_mask.numpy_view() == 1)
             condition_body = (category_mask.numpy_view() == 2)
             condition_face_skin = (category_mask.numpy_view() == 3)
@@ -369,8 +366,6 @@ def get_binary_mask(mp_image: mp.Image, method: str = "selfie") -> ndarray[Any, 
 
 def face_looking_straight(image: np.ndarray, x_threshold_angle_up=5, x_threshold_angle_down=-2,
                           y_threshold_angle=5) -> bool:
-    threshold_angle = 6
-
     mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image)
 
     # Use Tasks API FaceLandmarker instead of deprecated solutions API
