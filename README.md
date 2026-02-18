@@ -71,8 +71,9 @@ src/
   service.py        Orchestration layer
   face_utilities.py Validation & segmentation logic
   face_aligner.py   Rotation / scaling / crop
-  image_utilities.pyUpload & conversion helpers
+  image_utilities.py Upload & conversion helpers
   tests/            PyTest suite
+scripts/            Standalone tools (PEP 723)
 poc/                Prototype scripts
 Dockerfile, compose.yaml, .gitlab-ci.yml
 ```
@@ -85,22 +86,23 @@ Dockerfile, compose.yaml, .gitlab-ci.yml
 # Docker (recommended)
 docker compose up --build   # → http://localhost:8000/docs
 
-# Local venv
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn src.app:app --reload
+# Local (uv)
+uv sync
+uv run uvicorn src.app:app --reload
 
 # Tests
-pytest -q
+uv run pytest -q
+
+# Lint & format
+uv run ruff check src/
+uv run ruff format src/
 ```
 
 ---
 
 ## 5.5 - ML Model Downloads
 
-This project uses pre-trained models from MediaPipe and dlib. The models are currently stored in the repository, but
-can be downloaded from their original sources:
-add the two missing models which are already in the script the desription below.
+This project uses pre-trained models from MediaPipe and dlib. The models are currently stored in the repository, but can be downloaded from their original sources.
 
 ### MediaPipe Models
 
@@ -109,24 +111,18 @@ add the two missing models which are already in the script the desription below.
 - **Purpose**: Lightweight face detection optimized for selfie-like images
 - **Architecture**: Single Shot Detector (SSD) with custom encoder
 - **Input**: 128 x 128, float16
-- **Download**: [`blaze_face_short_range.tflite`](https://storage.googleapis.com/mediapipe-models/face_detector/blaze_
-  face_short_range/float16/latest/blaze_face_short_range.tflite)
-- **Documentation**: [MediaPipe Face
-  Detector](https://ai.google.dev/edge/mediapipe/solutions/vision/face_detector#blazeface_short-range)
-- **Model Card**: [BlazeFace Model
-  Card](<https://storage.googleapis.com/mediapipe-assets/MediaPipe%20BlazeFace%20Model%20Card%20(Short%20Range).pdf>)
+- **Download**: [`blaze_face_short_range.tflite`](https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/latest/blaze_face_short_range.tflite)
+- **Documentation**: [MediaPipe Face Detector](https://ai.google.dev/edge/mediapipe/solutions/vision/face_detector#blazeface_short-range)
+- **Model Card**: [BlazeFace Model Card](https://storage.googleapis.com/mediapipe-assets/MediaPipe%20BlazeFace%20Model%20Card%20(Short%20Range).pdf)
 
 #### Pose Landmarker (Lite)
 
 - **Purpose**: Human pose detection and 33-point 3D landmark estimation
 - **Architecture**: ConvNet similar to MobileNetV2 with GHUM 3D modeling
 - **Input**: Pose detector (224 x 224 x 3), Pose landmarker (256 x 256 x 3), float16
-- **Download**: [`pose_landmarker_lite.task`](https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_lan
-  dmarker_lite/float16/latest/pose_landmarker_lite.task)
-- **Documentation**: [MediaPipe Pose
-  Landmarker](https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker#models)
-- **Model Card**: [BlazePose GHUM 3D Model
-  Card](https://storage.googleapis.com/mediapipe-assets/Model%20Card%20BlazePose%20GHUM%203D.pdf)
+- **Download**: [`pose_landmarker_lite.task`](https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task)
+- **Documentation**: [MediaPipe Pose Landmarker](https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker#models)
+- **Model Card**: [BlazePose GHUM 3D Model Card](https://storage.googleapis.com/mediapipe-assets/Model%20Card%20BlazePose%20GHUM%203D.pdf)
 
 #### Selfie Multiclass Segmentation
 
