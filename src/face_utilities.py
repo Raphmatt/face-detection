@@ -164,44 +164,55 @@ def get_face_details(cv_image: np.ndarray, method: str = 'mediapipe') -> tuple[A
     :return: The angle of the face, the coordinates of the left eye and the coordinates of the right eye.
     """
     if method == 'mediapipe':
-        # Initialize the FaceMesh object with a 'with' statement for automatic resource management.
-        with mp.solutions.face_mesh.FaceMesh(
-                static_image_mode=False,
-                max_num_faces=5,
-                min_detection_confidence=0.5) as face_mesh:
-            # STEP 2: Detect faces in the input image.
-            face_mesh_results = face_mesh.process(cv_image)
+        # Use the Tasks API FaceLandmarker instead of deprecated solutions API
+        model_path = os.path.join(
+            os.path.dirname(__file__),
+            "models",
+            "mp_models",
+            "face_landmarker",
+            "face_landmarker.task",
+        )
+        with open(model_path, "rb") as f:
+            model = f.read()
 
-            # STEP 3: Extract landmarks for left and right eyes
-            if face_mesh_results.multi_face_landmarks:
-                for face_landmarks in face_mesh_results.multi_face_landmarks:
-                    # Check if there is exactly one face, as intended for rotation calculation.
-                    if len(face_mesh_results.multi_face_landmarks) == 1:
-                        # Extract landmarks for left and right eyes
-                        # Assuming landmarks 130 and 359 are the points we are interested in
-                        left_eye = face_landmarks.landmark[130]
-                        right_eye = face_landmarks.landmark[359]
+        options = vision.FaceLandmarkerOptions(
+            base_options=python.BaseOptions(model_asset_buffer=model),
+            output_face_blendshapes=False,
+            output_facial_transformation_matrixes=False,
+            num_faces=5,
+            min_face_detection_confidence=0.5,
+        )
 
-                        # Convert from relative coordinates to image coordinates
-                        left_eye_point = (
-                            int(left_eye.x * cv_image.shape[1]),
-                            int(left_eye.y * cv_image.shape[0]),
-                        )
-                        right_eye_point = (
-                            int(right_eye.x * cv_image.shape[1]),
-                            int(right_eye.y * cv_image.shape[0]),
-                        )
+        with vision.FaceLandmarker.create_from_options(options) as landmarker:
+            # Convert numpy array to MediaPipe Image
+            mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=cv_image)
+            result = landmarker.detect(mp_image)
 
-                        # Calculate the angle
-                        dy = right_eye_point[1] - left_eye_point[1]
-                        dx = right_eye_point[0] - left_eye_point[0]
+            # Check if exactly one face is detected
+            if result.face_landmarks and len(result.face_landmarks) == 1:
+                face_landmarks = result.face_landmarks[0]
+                # Landmarks 130 and 359 for left and right eye points
+                left_eye = face_landmarks[130]
+                right_eye = face_landmarks[359]
 
-                        # Store angle in degrees and return (also return left_eye and right_eye points for testing)
-                        return np.degrees(np.arctan2(dy, dx)), left_eye_point, right_eye_point
-                    else:
-                        # Return None if more than one face is detected.
-                        return None, None, None
-            # Return None if no faces are detected or there is any other issue.
+                # Convert from relative coordinates to image coordinates
+                left_eye_point = (
+                    int(left_eye.x * cv_image.shape[1]),
+                    int(left_eye.y * cv_image.shape[0]),
+                )
+                right_eye_point = (
+                    int(right_eye.x * cv_image.shape[1]),
+                    int(right_eye.y * cv_image.shape[0]),
+                )
+
+                # Calculate the angle
+                dy = right_eye_point[1] - left_eye_point[1]
+                dx = right_eye_point[0] - left_eye_point[0]
+
+                # Store angle in degrees and return
+                return np.degrees(np.arctan2(dy, dx)), left_eye_point, right_eye_point
+
+            # Return None if no faces or more than one face detected
             return None, None, None
 
     elif method == 'dlib':
@@ -360,58 +371,71 @@ def face_looking_straight(image: np.ndarray, x_threshold_angle_up=5, x_threshold
 
     mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image)
 
-    with mp.solutions.face_mesh.FaceMesh(
-            min_detection_confidence=0.5,
-            min_tracking_confidence=0.5) as face_mesh:
+    # Use Tasks API FaceLandmarker instead of deprecated solutions API
+    model_path = os.path.join(
+        os.path.dirname(__file__),
+        "models",
+        "mp_models",
+        "face_landmarker",
+        "face_landmarker.task",
+    )
+    with open(model_path, "rb") as f:
+        model = f.read()
 
+    options = vision.FaceLandmarkerOptions(
+        base_options=python.BaseOptions(model_asset_buffer=model),
+        output_face_blendshapes=False,
+        output_facial_transformation_matrixes=False,
+        num_faces=1,
+        min_face_detection_confidence=0.5,
+    )
+
+    with vision.FaceLandmarker.create_from_options(options) as landmarker:
         img_h = mp_image.height
         img_w = mp_image.width
         face_3d = []
         face_2d = []
 
-        np_array = image
+        result = landmarker.detect(mp_image)
 
-        results = face_mesh.process(np_array)
-
-        if not results.multi_face_landmarks:
+        if not result.face_landmarks:
             raise ValueError("No face detected.")
 
-        if len(results.multi_face_landmarks) != 1:
+        if len(result.face_landmarks) != 1:
             raise ValueError(
-                "Image must contain exactly one face. Current face count: " + str(len(results.multi_face_landmarks)))
+                "Image must contain exactly one face. Current face count: " + str(len(result.face_landmarks)))
 
-        if results.multi_face_landmarks:
-            face_landmarks = results.multi_face_landmarks[0]
-            for idx, lm in enumerate(face_landmarks.landmark):
-                if idx == 33 or idx == 263 or idx == 1 or idx == 61 or idx == 291 or idx == 199:
-                    x, y = int(lm.x * img_w), int(lm.y * img_h)
+        face_landmarks = result.face_landmarks[0]
+        for idx, lm in enumerate(face_landmarks):
+            if idx == 33 or idx == 263 or idx == 1 or idx == 61 or idx == 291 or idx == 199:
+                x, y = int(lm.x * img_w), int(lm.y * img_h)
 
-                    face_2d.append([x, y])
-                    face_3d.append([x, y, lm.z])
+                face_2d.append([x, y])
+                face_3d.append([x, y, lm.z])
 
-            face_2d = np.array(face_2d, dtype=np.float64)
-            face_3d = np.array(face_3d, dtype=np.float64)
+        face_2d = np.array(face_2d, dtype=np.float64)
+        face_3d = np.array(face_3d, dtype=np.float64)
 
-            focal_length = img_w
+        focal_length = img_w
 
-            cam_matrix = np.array([[focal_length, 0, img_h / 2],
-                                   [0, focal_length, img_w / 2],
-                                   [0, 0, 1]])
+        cam_matrix = np.array([[focal_length, 0, img_h / 2],
+                               [0, focal_length, img_w / 2],
+                               [0, 0, 1]])
 
-            dist_matrix = np.zeros((4, 1), dtype=np.float64)
-            success, rot_vec, trans_vec = cv2.solvePnP(face_3d, face_2d, cam_matrix, dist_matrix)
-            rmat, jac = cv2.Rodrigues(rot_vec)
-            angles, mtxR, mtxQ, Qx, Qy, Qz = cv2.RQDecomp3x3(rmat)
+        dist_matrix = np.zeros((4, 1), dtype=np.float64)
+        success, rot_vec, trans_vec = cv2.solvePnP(face_3d, face_2d, cam_matrix, dist_matrix)
+        rmat, jac = cv2.Rodrigues(rot_vec)
+        angles, mtxR, mtxQ, Qx, Qy, Qz = cv2.RQDecomp3x3(rmat)
 
-            x = angles[0] * 360
-            y = angles[1] * 360
+        x = angles[0] * 360
+        y = angles[1] * 360
 
-            if x > x_threshold_angle_up or x < x_threshold_angle_down:
-                print("x: " + str(x))
-                return False
-            if y > y_threshold_angle or y < -y_threshold_angle:
-                return False
-            return True
+        if x > x_threshold_angle_up or x < x_threshold_angle_down:
+            print("x: " + str(x))
+            return False
+        if y > y_threshold_angle or y < -y_threshold_angle:
+            return False
+        return True
 
 
 def shoulder_angle_valid(np_image: np.ndarray) -> bool | tuple[float, bool]:
