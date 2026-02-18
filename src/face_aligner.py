@@ -3,10 +3,9 @@ import numpy as np
 
 
 class FaceAligner:
-    def __init__(self,
-                 eye_spacing=(0.36, 0.40),
-                 desired_width=1024,
-                 desired_height=1280):
+    def __init__(
+        self, eye_spacing=(0.36, 0.40), desired_width=1024, desired_height=1280
+    ):
         """
         Aligns a face to a desired size and eye spacing
         :param eye_spacing: The space of the eyes and the edge of the image
@@ -34,14 +33,18 @@ class FaceAligner:
         # the ratio of the distance between eyes in the *current*
         # image to the ratio of distance between eyes in the
         # *desired* image
-        dist = np.sqrt((d_x ** 2) + (d_y ** 2))
-        desired_dist = (1.0 - self.desiredLeftEye[0] - self.desiredLeftEye[0]) * self.desiredWidth
+        dist = np.sqrt((d_x**2) + (d_y**2))
+        desired_dist = (
+            1.0 - self.desiredLeftEye[0] - self.desiredLeftEye[0]
+        ) * self.desiredWidth
         scale = desired_dist / dist
 
         # compute center (x, y)-coordinates (i.e., the median point)
         # between the two eyes in the input image
-        eyes_center = ((left_eye_pts[0] + right_eye_pts[0]) // 2,
-                      (left_eye_pts[1] + right_eye_pts[1]) // 2)
+        eyes_center = (
+            (left_eye_pts[0] + right_eye_pts[0]) // 2,
+            (left_eye_pts[1] + right_eye_pts[1]) // 2,
+        )
 
         # grab the rotation matrix for rotating and scaling the face
         material = cv2.getRotationMatrix2D(eyes_center, angle, scale)
@@ -49,22 +52,24 @@ class FaceAligner:
         # update the translation component of the matrix
         t_x = self.desiredWidth * 0.5
         t_y = self.desiredHeight * self.desiredLeftEye[1]
-        material[0, 2] += (t_x - eyes_center[0])
-        material[1, 2] += (t_y - eyes_center[1])
-
+        material[0, 2] += t_x - eyes_center[0]
+        material[1, 2] += t_y - eyes_center[1]
 
         # apply the affine transformation with transparent border mode
         (w, h) = (self.desiredWidth, self.desiredHeight)
-        output = cv2.warpAffine(image, material, (w, h),
-                                flags=cv2.INTER_CUBIC)
-
+        output = cv2.warpAffine(image, material, (w, h), flags=cv2.INTER_CUBIC)
 
         # Add an alpha channel to the image
         image_with_alpha = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
 
-        output_bounds = cv2.warpAffine(image_with_alpha, material, (w, h),
-                                flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_CONSTANT, borderValue=(0, 0, 0, 0))
-
+        output_bounds = cv2.warpAffine(
+            image_with_alpha,
+            material,
+            (w, h),
+            flags=cv2.INTER_CUBIC,
+            borderMode=cv2.BORDER_CONSTANT,
+            borderValue=(0, 0, 0, 0),
+        )
 
         # Check for out of bounds using alpha channel
         out_of_bounds = self._check_alpha_border(output_bounds)
@@ -88,9 +93,11 @@ class FaceAligner:
         right_edge = alpha_channel[:, -1]
 
         # If any border has transparent pixels (alpha value 0), return True
-        if (np.any(top_edge == 0) or
-                np.any(bottom_edge == 0) or
-                np.any(left_edge == 0) or
-                np.any(right_edge == 0)):
+        if (
+            np.any(top_edge == 0)
+            or np.any(bottom_edge == 0)
+            or np.any(left_edge == 0)
+            or np.any(right_edge == 0)
+        ):
             return True
         return False

@@ -15,16 +15,16 @@ from face_aligner import FaceAligner
 
 
 def align_face(
-        cv_image: np.ndarray,
-        allow_out_of_bounds: bool = False,
-        spacing_side: float = 0.72,
-        spacing_top: float = 0.4,
-        desired_width: int = 512,
-        desired_height: int = 640,
-        face_angle: float = None,
-        left_eye_point: tuple[int, int] = None,
-        right_eye_point: tuple[int, int] = None,
-        binary_method: str = "multiclass"
+    cv_image: np.ndarray,
+    allow_out_of_bounds: bool = False,
+    spacing_side: float = 0.72,
+    spacing_top: float = 0.4,
+    desired_width: int = 512,
+    desired_height: int = 640,
+    face_angle: float = None,
+    left_eye_point: tuple[int, int] = None,
+    right_eye_point: tuple[int, int] = None,
+    binary_method: str = "multiclass",
 ) -> np.ndarray:
     """
     Aligns a face to a desired size and eye spacing
@@ -45,19 +45,29 @@ def align_face(
 
     eye_spacing = (spacing_side / 2, spacing_top)
     # Align the face
-    aligned_image, out_of_bounds, rgba_aligned_image = (FaceAligner(
+    aligned_image, out_of_bounds, rgba_aligned_image = FaceAligner(
         eye_spacing=eye_spacing,
         desired_width=desired_width,
-        desired_height=desired_height)
-                                                        .align(cv_image, left_eye_point, right_eye_point))
+        desired_height=desired_height,
+    ).align(cv_image, left_eye_point, right_eye_point)
 
     if out_of_bounds and not allow_out_of_bounds:
         raise ValueError("Face is out of bounds.")
 
-    binary_mask = get_binary_mask(mp.Image(mp.ImageFormat.SRGB, aligned_image), method=binary_method)
-    _, binary_mask = cv2.threshold(cv2.cvtColor(binary_mask, cv2.COLOR_BGR2GRAY), 200, 255, cv2.THRESH_BINARY_INV)
-    binary_mask = cv2.morphologyEx(binary_mask, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (4, 4)))
-    binary_mask = np.array(Image.fromarray(binary_mask).filter(ImageFilter.ModeFilter(size=10)))
+    binary_mask = get_binary_mask(
+        mp.Image(mp.ImageFormat.SRGB, aligned_image), method=binary_method
+    )
+    _, binary_mask = cv2.threshold(
+        cv2.cvtColor(binary_mask, cv2.COLOR_BGR2GRAY), 200, 255, cv2.THRESH_BINARY_INV
+    )
+    binary_mask = cv2.morphologyEx(
+        binary_mask,
+        cv2.MORPH_OPEN,
+        cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (4, 4)),
+    )
+    binary_mask = np.array(
+        Image.fromarray(binary_mask).filter(ImageFilter.ModeFilter(size=10))
+    )
 
     if out_of_bounds:
         # Use the alpha channel from rgba_aligned_image as an additional mask
@@ -67,7 +77,9 @@ def align_face(
         combined_mask = cv2.bitwise_and(binary_mask, alpha_mask)
 
         # Apply the combined mask to get the foreground (face)
-        foreground = cv2.bitwise_and(rgba_aligned_image, rgba_aligned_image, mask=combined_mask)
+        foreground = cv2.bitwise_and(
+            rgba_aligned_image, rgba_aligned_image, mask=combined_mask
+        )
     else:
         # If not out of bounds, use the binary mask alone
         foreground = cv2.bitwise_and(aligned_image, aligned_image, mask=binary_mask)
@@ -81,7 +93,9 @@ def align_face(
     return foreground_rgba  # Return the RGBA image with transparent background
 
 
-def get_face_count(mp_image: mp.Image, method: str = "mediapipe") -> tuple[int, list[tuple[int, int, int, int]]]:
+def get_face_count(
+    mp_image: mp.Image, method: str = "mediapipe"
+) -> tuple[int, list[tuple[int, int, int, int]]]:
     """
     Detect the number of faces in an image using Mediapipe.
     :param mp_image: The input image as a MediaPipe Image object.
@@ -102,9 +116,8 @@ def get_face_count(mp_image: mp.Image, method: str = "mediapipe") -> tuple[int, 
 
         # STEP 1: Create an FaceDetector object.
         options = vision.FaceDetectorOptions(
-            base_options=(python.BaseOptions(
-                model_asset_buffer=model
-            )), min_detection_confidence=0.7
+            base_options=(python.BaseOptions(model_asset_buffer=model)),
+            min_detection_confidence=0.7,
         )
 
         # Using 'with' statement for automatic resource management.
@@ -131,7 +144,7 @@ def get_face_count(mp_image: mp.Image, method: str = "mediapipe") -> tuple[int, 
             os.path.dirname(__file__),
             "models",
             "dlib_models",
-            "shape_predictor_68_face_landmarks.dat"
+            "shape_predictor_68_face_landmarks.dat",
         )
         # Convert the image to grayscale
         gray = cv2.cvtColor(mp_image.numpy_view(), cv2.COLOR_BGR2GRAY)
@@ -153,15 +166,16 @@ def get_face_count(mp_image: mp.Image, method: str = "mediapipe") -> tuple[int, 
         return len(faces), bbox
 
 
-def get_face_details(cv_image: np.ndarray, method: str = 'mediapipe') -> tuple[Any, tuple[int, int], tuple[int, int]] | \
-                                                                         tuple[None, None, None]:
+def get_face_details(
+    cv_image: np.ndarray, method: str = "mediapipe"
+) -> tuple[Any, tuple[int, int], tuple[int, int]] | tuple[None, None, None]:
     """
     Gets the angle of the face as well as the coordinates of the left and right eye.
     :param cv_image: The input image with the face to be rotated as a numpy array.
     :param method: The method to use for face detection ('mediapipe' or 'dlib').
     :return: The angle of the face, the coordinates of the left eye and the coordinates of the right eye.
     """
-    if method == 'mediapipe':
+    if method == "mediapipe":
         # Use the Tasks API FaceLandmarker instead of deprecated solutions API
         model_path = os.path.join(
             os.path.dirname(__file__),
@@ -213,16 +227,18 @@ def get_face_details(cv_image: np.ndarray, method: str = 'mediapipe') -> tuple[A
             # Return None if no faces or more than one face detected
             return None, None, None
 
-    elif method == 'dlib':
+    elif method == "dlib":
         # Initialize dlib's face detector and facial landmark predictor
         detector = dlib.get_frontal_face_detector()
         model_path = os.path.join(
             os.path.dirname(__file__),
             "models",
             "dlib_models",
-            "shape_predictor_68_face_landmarks.dat"
+            "shape_predictor_68_face_landmarks.dat",
         )
-        predictor = dlib.shape_predictor(model_path)  # Path to the landmark predictor model
+        predictor = dlib.shape_predictor(
+            model_path
+        )  # Path to the landmark predictor model
 
         # Convert the image to grayscale
         gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
@@ -256,7 +272,9 @@ def get_face_details(cv_image: np.ndarray, method: str = 'mediapipe') -> tuple[A
         raise ValueError("Invalid method specified. Choose 'mediapipe' or 'dlib'.")
 
 
-def get_binary_mask(mp_image: mp.Image, method: str = "selfie") -> ndarray[Any, dtype[Any]]:
+def get_binary_mask(
+    mp_image: mp.Image, method: str = "selfie"
+) -> ndarray[Any, dtype[Any]]:
     """
     Returns a binary mask of the input image using Mediapipe.
     A 3 diamensional numpy array is returned. The background is white, the foreground is black. (255, 255, 255) and (0, 0, 0) respectively.
@@ -268,7 +286,6 @@ def get_binary_mask(mp_image: mp.Image, method: str = "selfie") -> ndarray[Any, 
     final_image = None
 
     if method == "selfie":
-
         model_path = os.path.join(
             os.path.dirname(__file__),
             "models",
@@ -281,9 +298,8 @@ def get_binary_mask(mp_image: mp.Image, method: str = "selfie") -> ndarray[Any, 
 
         # Create an image segmenter instance with the image mode:
         options = vision.ImageSegmenterOptions(
-            base_options=(python.BaseOptions(
-                model_asset_buffer=model
-            )), output_category_mask=True
+            base_options=(python.BaseOptions(model_asset_buffer=model)),
+            output_category_mask=True,
         )
 
         with vision.ImageSegmenter.create_from_options(options) as segmenter:
@@ -321,10 +337,8 @@ def get_binary_mask(mp_image: mp.Image, method: str = "selfie") -> ndarray[Any, 
             model = f.read()
 
         options = vision.ImageSegmenterOptions(
-            base_options=(python.BaseOptions(
-                model_asset_buffer=model
-            )),
-            output_category_mask=True
+            base_options=(python.BaseOptions(model_asset_buffer=model)),
+            output_category_mask=True,
         )
 
         with vision.ImageSegmenter.create_from_options(options) as segmenter:
@@ -332,11 +346,11 @@ def get_binary_mask(mp_image: mp.Image, method: str = "selfie") -> ndarray[Any, 
             category_mask = segmentation_result.category_mask
 
             # Select only the hair category (usually represented by index 1)
-            condition_hair = (category_mask.numpy_view() == 1)
-            condition_body = (category_mask.numpy_view() == 2)
-            condition_face_skin = (category_mask.numpy_view() == 3)
-            condition_clothes = (category_mask.numpy_view() == 4)
-            condition_others = (category_mask.numpy_view() == 5)
+            condition_hair = category_mask.numpy_view() == 1
+            condition_body = category_mask.numpy_view() == 2
+            condition_face_skin = category_mask.numpy_view() == 3
+            condition_clothes = category_mask.numpy_view() == 4
+            condition_others = category_mask.numpy_view() == 5
 
             # Combine the conditions (logical OR)
             combined_condition = np.logical_or(condition_hair, condition_body)
@@ -354,7 +368,9 @@ def get_binary_mask(mp_image: mp.Image, method: str = "selfie") -> ndarray[Any, 
             white_background = np.ones_like(mp_image.numpy_view()) * 255
 
             # Apply the combined condition on the black background
-            black_background = np.where(combined_condition_stacked, black_background, white_background)
+            black_background = np.where(
+                combined_condition_stacked, black_background, white_background
+            )
 
             final_image = black_background
 
@@ -364,8 +380,12 @@ def get_binary_mask(mp_image: mp.Image, method: str = "selfie") -> ndarray[Any, 
     return np.array(pil_image_mask)
 
 
-def face_looking_straight(image: np.ndarray, x_threshold_angle_up=5, x_threshold_angle_down=-2,
-                          y_threshold_angle=5) -> bool:
+def face_looking_straight(
+    image: np.ndarray,
+    x_threshold_angle_up=5,
+    x_threshold_angle_down=-2,
+    y_threshold_angle=5,
+) -> bool:
     mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image)
 
     # Use Tasks API FaceLandmarker instead of deprecated solutions API
@@ -400,11 +420,20 @@ def face_looking_straight(image: np.ndarray, x_threshold_angle_up=5, x_threshold
 
         if len(result.face_landmarks) != 1:
             raise ValueError(
-                "Image must contain exactly one face. Current face count: " + str(len(result.face_landmarks)))
+                "Image must contain exactly one face. Current face count: "
+                + str(len(result.face_landmarks))
+            )
 
         face_landmarks = result.face_landmarks[0]
         for idx, lm in enumerate(face_landmarks):
-            if idx == 33 or idx == 263 or idx == 1 or idx == 61 or idx == 291 or idx == 199:
+            if (
+                idx == 33
+                or idx == 263
+                or idx == 1
+                or idx == 61
+                or idx == 291
+                or idx == 199
+            ):
                 x, y = int(lm.x * img_w), int(lm.y * img_h)
 
                 face_2d.append([x, y])
@@ -415,12 +444,14 @@ def face_looking_straight(image: np.ndarray, x_threshold_angle_up=5, x_threshold
 
         focal_length = img_w
 
-        cam_matrix = np.array([[focal_length, 0, img_h / 2],
-                               [0, focal_length, img_w / 2],
-                               [0, 0, 1]])
+        cam_matrix = np.array(
+            [[focal_length, 0, img_h / 2], [0, focal_length, img_w / 2], [0, 0, 1]]
+        )
 
         dist_matrix = np.zeros((4, 1), dtype=np.float64)
-        success, rot_vec, trans_vec = cv2.solvePnP(face_3d, face_2d, cam_matrix, dist_matrix)
+        success, rot_vec, trans_vec = cv2.solvePnP(
+            face_3d, face_2d, cam_matrix, dist_matrix
+        )
         rmat, jac = cv2.Rodrigues(rot_vec)
         angles, mtxR, mtxQ, Qx, Qy, Qz = cv2.RQDecomp3x3(rmat)
 
@@ -450,9 +481,8 @@ def shoulder_angle_valid(np_image: np.ndarray) -> bool | tuple[float, bool]:
         model_data = f.read()
 
     options = vision.PoseLandmarkerOptions(
-        base_options=(python.BaseOptions(
-            model_asset_buffer=model_data
-        )), min_pose_detection_confidence=0.5
+        base_options=(python.BaseOptions(model_asset_buffer=model_data)),
+        min_pose_detection_confidence=0.5,
     )
 
     with python.vision.PoseLandmarker.create_from_options(options) as detector:
@@ -467,7 +497,8 @@ def shoulder_angle_valid(np_image: np.ndarray) -> bool | tuple[float, bool]:
         right_shoulder = pose_result.pose_landmarks[0][12]
 
         angle_radians = math.atan2(
-            abs(right_shoulder.y - left_shoulder.y), abs(right_shoulder.x - left_shoulder.x)
+            abs(right_shoulder.y - left_shoulder.y),
+            abs(right_shoulder.x - left_shoulder.x),
         )
         angle_degrees = math.degrees(angle_radians)
 
