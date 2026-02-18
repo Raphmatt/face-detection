@@ -303,7 +303,9 @@ def get_binary_mask(mp_image: mp.Image, method: str = "selfie") -> ndarray[Any, 
             bg_image = np.zeros(image_data.shape, dtype=np.uint8)
             bg_image[:] = person_color
 
-            condition = np.stack((category_mask.numpy_view(),) * 3, axis=-1)
+            # Squeeze to handle (H, W, 1) shape from newer mediapipe versions
+            mask_2d = np.squeeze(category_mask.numpy_view())
+            condition = np.stack((mask_2d,) * 3, axis=-1)
             output_image = np.where(condition, fg_image, bg_image)
 
             final_image = output_image

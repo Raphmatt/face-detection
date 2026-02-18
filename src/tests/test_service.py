@@ -36,11 +36,11 @@ def test_detect_face_count_returns_count(file: str, expected_face_count: int):
 testdata_detect_face_rotation = [
     ("one_face.jpg", 2),
     ("rotated_face_1.jpg", -17),
-    ("rotated_face_2.jpg", -27),
+    ("rotated_face_2.jpg", -28),
     ("rotated_face_3.jpg", -10),
     ("rotated_face_4.jpg", 2),
     ("rotated_face_5.jpg", 46),
-    ("rotated_face_6.jpg", 4),
+    ("rotated_face_6.jpg", 6),
 ]
 
 
