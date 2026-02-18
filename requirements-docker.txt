@@ -1,8 +1,0 @@
-fastapi~=0.105.0
-uvicorn~=0.24.0.post1
-mediapipe~=0.10.8
-numpy~=1.26.2
-Pillow~=12.1.1
-pytest~=7.4.3
-opencv-contrib-python-headless-rolling~=5.0.0.20221015
-python-multipart~=0.0.6

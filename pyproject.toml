@@ -5,14 +5,14 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "mediapipe~=0.10.8",
+    "mediapipe~=0.10.32",
     "dlib>=19.24.6",
-    "fastapi>=0.116.1",
-    "pillow>=11.3.0",
+    "fastapi>=0.129.0",
+    "pillow>=12.1.1",
     "pytest>=7.4.4",
-    "uvicorn>=0.24.0.post1",
+    "uvicorn>=0.41.0",
     "opencv-contrib-python-headless-rolling>=5.0.0.20221015",
-    "python-multipart>=0.0.20",
+    "python-multipart>=0.0.22",
     "numpy<2",
 ]
 
@@ -20,8 +20,8 @@ dependencies = [
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
-[tool.uv]
-dev-dependencies = ["pytest~=7.4.3"]
+[dependency-groups]
+dev = ["pytest>=7.4.4"]
 
 [tool.pyright]
 venvPath = "."
