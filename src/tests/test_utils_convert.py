@@ -10,4 +10,3 @@ def test_convert_to_rgb_returns_rgb_image():
     processed_image = rgba_2_rgb(sample_image)
     assert isinstance(processed_image, np.ndarray)
     assert processed_image.shape[-1] == 3  # Image should be converted to RGB (3 channels)
-
