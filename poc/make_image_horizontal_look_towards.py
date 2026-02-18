@@ -17,9 +17,10 @@ BG_COLOR = (0, 255, 196)
 
 MODEL = os.path.join(
     os.path.dirname(__file__),
-    "../src/models/mp_models/segmentation/selfie_multiclass_256x256.tflite")
+    "../src/models/mp_models/segmentation/selfie_multiclass_256x256.tflite",
+)
 
-with open(MODEL, 'rb') as f:
+with open(MODEL, "rb") as f:
     model = f.read()
 
 
@@ -28,8 +29,9 @@ prevTime = 0
 
 # Create the options that will be used for ImageSegmenter
 base_options_segmenter = python.BaseOptions(model_asset_buffer=model)
-options_segmenter = vision.ImageSegmenterOptions(base_options=base_options_segmenter,
-                                                 output_category_mask=True)
+options_segmenter = vision.ImageSegmenterOptions(
+    base_options=base_options_segmenter, output_category_mask=True
+)
 
 
 def calculate_face_transformation(face_landmarks, image_shape):
@@ -40,17 +42,24 @@ def calculate_face_transformation(face_landmarks, image_shape):
 
     # Destination points - where we want the landmarks to be after transformation
     # These would be the points for a front-facing face
-    dst_points = np.float32([
-        [100, 100],  # Corresponding point for landmark 33
-        [200, 100],  # Corresponding point for landmark 133
-        # ... add more corresponding points ...
-    ])
+    dst_points = np.float32(
+        [
+            [100, 100],  # Corresponding point for landmark 33
+            [200, 100],  # Corresponding point for landmark 133
+            # ... add more corresponding points ...
+        ]
+    )
 
     # Extract the corresponding source points from the face landmarks
-    src_points = np.float32([
-        [face_landmarks.landmark[i].x * image_shape[1], face_landmarks.landmark[i].y * image_shape[0]]
-        for i in landmarks_indices
-    ])
+    src_points = np.float32(
+        [
+            [
+                face_landmarks.landmark[i].x * image_shape[1],
+                face_landmarks.landmark[i].y * image_shape[0],
+            ]
+            for i in landmarks_indices
+        ]
+    )
 
     # Calculate the transformation matrix
     transformation_matrix = cv2.getPerspectiveTransform(src_points, dst_points)
@@ -59,11 +68,14 @@ def calculate_face_transformation(face_landmarks, image_shape):
 
 
 with mp_face_mesh.FaceMesh(
-        static_image_mode=False,
-        max_num_faces=1,
-        min_detection_confidence=0.5,
-        min_tracking_confidence=0.5) as face_mesh:
-    with python.vision.ImageSegmenter.create_from_options(options_segmenter) as segmenter:
+    static_image_mode=False,
+    max_num_faces=1,
+    min_detection_confidence=0.5,
+    min_tracking_confidence=0.5,
+) as face_mesh:
+    with python.vision.ImageSegmenter.create_from_options(
+        options_segmenter
+    ) as segmenter:
         bg_image = None
 
         while cap.isOpened():
@@ -87,11 +99,16 @@ with mp_face_mesh.FaceMesh(
 
             if face_mesh_results.multi_face_landmarks:
                 for face_landmarks in face_mesh_results.multi_face_landmarks:
-                    transformation_matrix = calculate_face_transformation(face_landmarks, image.shape)
+                    transformation_matrix = calculate_face_transformation(
+                        face_landmarks, image.shape
+                    )
 
                     # Perform the transformation
-                    output_image = cv2.warpPerspective(output_image, transformation_matrix,
-                                                       (image.shape[1], image.shape[0]))
+                    output_image = cv2.warpPerspective(
+                        output_image,
+                        transformation_matrix,
+                        (image.shape[1], image.shape[0]),
+                    )
 
                     # Draw landmarks after transformation
                     mp_drawing.draw_landmarks(
@@ -106,8 +123,16 @@ with mp_face_mesh.FaceMesh(
             currTime = time.time()
             fps = 1 / (currTime - prevTime)
             prevTime = currTime
-            cv2.putText(output_image_bgr, f'fps: {int(fps)}', (20, 70), cv2.FONT_HERSHEY_PLAIN, 3, (0, 0, 0), 2)
+            cv2.putText(
+                output_image_bgr,
+                f"fps: {int(fps)}",
+                (20, 70),
+                cv2.FONT_HERSHEY_PLAIN,
+                3,
+                (0, 0, 0),
+                2,
+            )
 
-            cv2.imshow('DIY Background removal', output_image_bgr)
+            cv2.imshow("DIY Background removal", output_image_bgr)
             if cv2.waitKey(5) & 0xFF == 27:  # Exit on pressing ESC
                 break
