@@ -17,9 +17,10 @@ BG_COLOR = (0, 255, 196)
 
 MODEL = os.path.join(
     os.path.dirname(__file__),
-    "../src/models/mp_models/segmentation/selfie_multiclass_256x256.tflite")
+    "../src/models/mp_models/segmentation/selfie_multiclass_256x256.tflite",
+)
 
-with open(MODEL, 'rb') as f:
+with open(MODEL, "rb") as f:
     model = f.read()
 
 # cap = cv2.VideoCapture(0)
@@ -27,15 +28,19 @@ prevTime = 0
 
 # Create the options that will be used for ImageSegmenter
 base_options_segmenter = python.BaseOptions(model_asset_buffer=model)
-options_segmenter = vision.ImageSegmenterOptions(base_options=base_options_segmenter,
-                                                 output_category_mask=True)
+options_segmenter = vision.ImageSegmenterOptions(
+    base_options=base_options_segmenter, output_category_mask=True
+)
 
 with mp_face_mesh.FaceMesh(
-        static_image_mode=False,
-        max_num_faces=1,
-        min_detection_confidence=0.5,
-        min_tracking_confidence=0.5) as face_mesh:
-    with python.vision.ImageSegmenter.create_from_options(options_segmenter) as segmenter:
+    static_image_mode=False,
+    max_num_faces=1,
+    min_detection_confidence=0.5,
+    min_tracking_confidence=0.5,
+) as face_mesh:
+    with python.vision.ImageSegmenter.create_from_options(
+        options_segmenter
+    ) as segmenter:
         bg_image = None
 
         # while cap.isOpened():
@@ -44,9 +49,7 @@ with mp_face_mesh.FaceMesh(
         #         print("Ignoring empty camera frame.")
         #         continue
 
-        image = cv2.imread(
-            "../src/tests/testdata/rotated_face_6.jpg")
-
+        image = cv2.imread("../src/tests/testdata/rotated_face_6.jpg")
 
         # Convert the BGR image to RGB (if your model expects RGB input)
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -91,8 +94,14 @@ with mp_face_mesh.FaceMesh(
                 right_eye = face_landmarks.landmark[359]
 
                 # Convert from relative coordinates to image coordinates
-                left_eye_point = (int(left_eye.x * image.shape[1]), int(left_eye.y * image.shape[0]))
-                right_eye_point = (int(right_eye.x * image.shape[1]), int(right_eye.y * image.shape[0]))
+                left_eye_point = (
+                    int(left_eye.x * image.shape[1]),
+                    int(left_eye.y * image.shape[0]),
+                )
+                right_eye_point = (
+                    int(right_eye.x * image.shape[1]),
+                    int(right_eye.y * image.shape[0]),
+                )
 
                 # Calculate the angle
                 dy = right_eye_point[1] - left_eye_point[1]
@@ -102,13 +111,19 @@ with mp_face_mesh.FaceMesh(
 
                 # Calculate the center for rotation
                 center = (
-                    (left_eye_point[0] + right_eye_point[0]) // 2, (left_eye_point[1] + right_eye_point[1]) // 2)
+                    (left_eye_point[0] + right_eye_point[0]) // 2,
+                    (left_eye_point[1] + right_eye_point[1]) // 2,
+                )
 
                 # Create rotation matrix
-                rotation_matrix = cv2.getRotationMatrix2D(center, angle, 1)  # Changed -angle to angle
+                rotation_matrix = cv2.getRotationMatrix2D(
+                    center, angle, 1
+                )  # Changed -angle to angle
 
                 # Perform the rotation
-                output_image = cv2.warpAffine(output_image, rotation_matrix, (image.shape[1], image.shape[0]))
+                output_image = cv2.warpAffine(
+                    output_image, rotation_matrix, (image.shape[1], image.shape[0])
+                )
 
                 # Draw landmarks after rotation
                 # mp_drawing.draw_landmarks(
@@ -123,9 +138,17 @@ with mp_face_mesh.FaceMesh(
         currTime = time.time()
         fps = 1 / (currTime - prevTime)
         prevTime = currTime
-        cv2.putText(output_image_bgr, f'fps: {int(fps)}', (20, 70), cv2.FONT_HERSHEY_PLAIN, 3, (0, 0, 0), 2)
+        cv2.putText(
+            output_image_bgr,
+            f"fps: {int(fps)}",
+            (20, 70),
+            cv2.FONT_HERSHEY_PLAIN,
+            3,
+            (0, 0, 0),
+            2,
+        )
 
-        cv2.imshow('DIY Background removal', output_image_bgr)
+        cv2.imshow("DIY Background removal", output_image_bgr)
         cv2.waitKey(0)
         # if cv2.waitKey(5) & 0xFF == 27:  # Exit on pressing ESC
         #     break
