@@ -18,13 +18,31 @@ async def heartbeat():
 
 @router.post("/image/process")
 async def process_image(
-        file: UploadFile = File(...),
-        bounds: bool = Query(False, alias="bounds", description="Allow out of bounds processing (True/False)"),
-        spacing_side: float = Query(0.72, alias="side_spacing", description="Spacing on the side (0 = edge, 0.99998 = middle)"),
-        spacing_top: float = Query(0.4, alias="top_spacing", description="Spacing on the top (0 = top edge, 0.99998 = bottom edge, 0.5 = middle)"),
-        desired_width: int = Query(512, alias="width", description="Desired width of the final image"),
-        default_height: int = Query(640, alias="height", description="Desired height of the final image"),
-        binary_method: str = Query("multiclass", alias="binary_method", description="Method used for background removal (multiclass (more accurate, slower), selfie (faster, less accurate)")
+    file: UploadFile = File(...),
+    bounds: bool = Query(
+        False, alias="bounds", description="Allow out of bounds processing (True/False)"
+    ),
+    spacing_side: float = Query(
+        0.72,
+        alias="side_spacing",
+        description="Spacing on the side (0 = edge, 0.99998 = middle)",
+    ),
+    spacing_top: float = Query(
+        0.4,
+        alias="top_spacing",
+        description="Spacing on the top (0 = top edge, 0.99998 = bottom edge, 0.5 = middle)",
+    ),
+    desired_width: int = Query(
+        512, alias="width", description="Desired width of the final image"
+    ),
+    default_height: int = Query(
+        640, alias="height", description="Desired height of the final image"
+    ),
+    binary_method: str = Query(
+        "multiclass",
+        alias="binary_method",
+        description="Method used for background removal (multiclass (more accurate, slower), selfie (faster, less accurate)",
+    ),
 ):
     try:
         image_array = await service.process_image(
@@ -34,7 +52,8 @@ async def process_image(
             spacing_top=spacing_top,
             desired_width=desired_width,
             default_height=default_height,
-            binary_method=binary_method)
+            binary_method=binary_method,
+        )
 
         # Ensure the NumPy array is in the correct format (e.g., uint8)
         if image_array.dtype != np.uint8:
@@ -45,7 +64,7 @@ async def process_image(
 
         # Save the image to a BytesIO object
         img_io = BytesIO()
-        image.save(img_io, 'PNG')
+        image.save(img_io, "PNG")
         img_io.seek(0)
 
         # Return the image in response

@@ -2,20 +2,25 @@ import mediapipe as mp
 import numpy as np
 from fastapi import UploadFile, File
 
-from face_utilities import get_face_count, align_face, get_face_details, face_looking_straight, shoulder_angle_valid
+from face_utilities import (
+    get_face_count,
+    align_face,
+    get_face_details,
+    face_looking_straight,
+    shoulder_angle_valid,
+)
 from image_utilities import uploadFile_2_np_image
 
 
 async def process_image(
-        file: UploadFile = File(...),
-        override_file=None,
-        allow_out_of_bounds=False,
-        spacing_side=0.72,
-        spacing_top=0.4,
-        desired_width=512,
-        default_height=640,
-        binary_method="multiclass"
-
+    file: UploadFile = File(...),
+    override_file=None,
+    allow_out_of_bounds=False,
+    spacing_side=0.72,
+    spacing_top=0.4,
+    desired_width=512,
+    default_height=640,
+    binary_method="multiclass",
 ) -> np.ndarray:
     """
     Processes an image and returns the aligned face.
@@ -38,14 +43,17 @@ async def process_image(
 
     # check the count of faces
     face_count, face_boxes = get_face_count(
-        mp.Image(image_format=mp.ImageFormat.SRGB, data=np_image),
-        method="mediapipe")
+        mp.Image(image_format=mp.ImageFormat.SRGB, data=np_image), method="mediapipe"
+    )
 
     if face_count != 1:
-        face_count, face_boxes = get_face_count(mp.Image(image_format=mp.ImageFormat.SRGB, data=np_image),
-                                                method="dlib")
+        face_count, face_boxes = get_face_count(
+            mp.Image(image_format=mp.ImageFormat.SRGB, data=np_image), method="dlib"
+        )
         if face_count != 1:
-            raise ValueError("Image must contain exactly one face. face count: " + str(face_count))
+            raise ValueError(
+                "Image must contain exactly one face. face count: " + str(face_count)
+            )
         else:
             method = "dlib"
 
@@ -74,5 +82,6 @@ async def process_image(
         face_angle=face_angle,
         left_eye_point=left,
         right_eye_point=right,
-        binary_method=binary_method)
+        binary_method=binary_method,
+    )
     return final_image
