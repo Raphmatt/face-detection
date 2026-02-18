@@ -247,9 +247,8 @@ dependencies = [
     { name = "fastapi" },
     { name = "mediapipe" },
     { name = "numpy" },
-    { name = "opencv-contrib-python-headless-rolling" },
+    { name = "opencv-python-headless" },
     { name = "pillow" },
-    { name = "pytest" },
     { name = "python-multipart" },
     { name = "uvicorn" },
 ]
@@ -265,15 +264,14 @@ requires-dist = [
     { name = "fastapi", specifier = ">=0.129.0" },
     { name = "mediapipe", specifier = "~=0.10.32" },
     { name = "numpy", specifier = "<2" },
-    { name = "opencv-contrib-python-headless-rolling", specifier = ">=5.0.0.20221015" },
+    { name = "opencv-python-headless", specifier = ">=4.8.0" },
     { name = "pillow", specifier = ">=12.1.1" },
-    { name = "pytest", specifier = ">=7.4.4" },
     { name = "python-multipart", specifier = ">=0.0.22" },
     { name = "uvicorn", specifier = ">=0.41.0" },
 ]
 
 [package.metadata.requires-dev]
-dev = [{ name = "pytest", specifier = ">=7.4.4" }]
+dev = [{ name = "pytest", specifier = ">=9.0.0" }]
 
 [[package]]
 name = "fastapi"
@@ -589,19 +587,20 @@ wheels = [
 ]
 
 [[package]]
-name = "opencv-contrib-python-headless-rolling"
-version = "5.0.0.20221015"
+name = "opencv-python-headless"
+version = "4.11.0.86"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/36/2f/5b2b3ba52c864848885ba988f24b7f105052f68da9ab0e693cc7c25b0b30/opencv-python-headless-4.11.0.86.tar.gz", hash = "sha256:996eb282ca4b43ec6a3972414de0e2331f5d9cda2b41091a49739c19fb843798", size = 95177929, upload-time = "2025-01-16T13:53:40.22Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ea/76/4050212989cf16b5ef4990a15c3c6b025ff2e477b827c128c9ee378bc3fb/opencv_contrib_python_headless_rolling-5.0.0.20221015-cp36-abi3-macosx_10_13_x86_64.whl", hash = "sha256:4f372786debde964526227039b42e90aee8fd71754689314dbccb103d7ca8f67", size = 58713616, upload-time = "2022-10-15T09:09:39.355Z" },
-    { url = "https://files.pythonhosted.org/packages/43/7d/c77e7b9b4f605d16bd69687bb2393d1b8af6505155ecb314456ca2327fa0/opencv_contrib_python_headless_rolling-5.0.0.20221015-cp36-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:81800aaf84346e3259c0663d0ec8131004842586fd1ed565f269efa241dc3fa6", size = 31920150, upload-time = "2022-10-15T11:46:14.041Z" },
-    { url = "https://files.pythonhosted.org/packages/44/f3/ee60c3e8505eddbe43fbaf4c7a1696bac389045f0846616c3416ab6034a7/opencv_contrib_python_headless_rolling-5.0.0.20221015-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:cb02dbf201018db5b5d5214d9a98654c55380a9a6147da9d4facef61d1021275", size = 56738606, upload-time = "2022-10-15T08:30:18.19Z" },
-    { url = "https://files.pythonhosted.org/packages/e0/52/2907f3eb57aa10414af5d074cfb89ae6b12722e10751149976d3145ee340/opencv_contrib_python_headless_rolling-5.0.0.20221015-cp36-abi3-win32.whl", hash = "sha256:391dabd5312c430fa4e454bf7992ec0f8786c76bd1f17d493df714ee92bac576", size = 34391800, upload-time = "2022-10-15T08:27:33.322Z" },
-    { url = "https://files.pythonhosted.org/packages/1e/42/c7cabf239816615ab35891e45fa827b445eaf93d8bf0d9a287de477a3b37/opencv_contrib_python_headless_rolling-5.0.0.20221015-cp36-abi3-win_amd64.whl", hash = "sha256:b6f679b57ad302067fcb6eab24348fcdbbbbc8ab55eb0915a4d0f37bd45989b4", size = 44725627, upload-time = "2022-10-15T08:27:36.981Z" },
-    { url = "https://files.pythonhosted.org/packages/76/41/dfc3d2b88f8302e4fe4e2999d7d756195b5237b10c0913e249b7653fa21c/opencv_contrib_python_headless_rolling-5.0.0.20221015-cp37-abi3-macosx_11_0_arm64.whl", hash = "sha256:8c47c95dfd02d368bf91238c1c587a59a599dc4d8387ce80589628077597fb42", size = 42759573, upload-time = "2022-10-15T10:47:03.724Z" },
+    { url = "https://files.pythonhosted.org/packages/dc/53/2c50afa0b1e05ecdb4603818e85f7d174e683d874ef63a6abe3ac92220c8/opencv_python_headless-4.11.0.86-cp37-abi3-macosx_13_0_arm64.whl", hash = "sha256:48128188ade4a7e517237c8e1e11a9cdf5c282761473383e77beb875bb1e61ca", size = 37326460, upload-time = "2025-01-16T13:52:57.015Z" },
+    { url = "https://files.pythonhosted.org/packages/3b/43/68555327df94bb9b59a1fd645f63fafb0762515344d2046698762fc19d58/opencv_python_headless-4.11.0.86-cp37-abi3-macosx_13_0_x86_64.whl", hash = "sha256:a66c1b286a9de872c343ee7c3553b084244299714ebb50fbdcd76f07ebbe6c81", size = 56723330, upload-time = "2025-01-16T13:55:45.731Z" },
+    { url = "https://files.pythonhosted.org/packages/45/be/1438ce43ebe65317344a87e4b150865c5585f4c0db880a34cdae5ac46881/opencv_python_headless-4.11.0.86-cp37-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:6efabcaa9df731f29e5ea9051776715b1bdd1845d7c9530065c7951d2a2899eb", size = 29487060, upload-time = "2025-01-16T13:51:59.625Z" },
+    { url = "https://files.pythonhosted.org/packages/dd/5c/c139a7876099916879609372bfa513b7f1257f7f1a908b0bdc1c2328241b/opencv_python_headless-4.11.0.86-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:0e0a27c19dd1f40ddff94976cfe43066fbbe9dfbb2ec1907d66c19caef42a57b", size = 49969856, upload-time = "2025-01-16T13:53:29.654Z" },
+    { url = "https://files.pythonhosted.org/packages/95/dd/ed1191c9dc91abcc9f752b499b7928aacabf10567bb2c2535944d848af18/opencv_python_headless-4.11.0.86-cp37-abi3-win32.whl", hash = "sha256:f447d8acbb0b6f2808da71fddd29c1cdd448d2bc98f72d9bb78a7a898fc9621b", size = 29324425, upload-time = "2025-01-16T13:52:49.048Z" },
+    { url = "https://files.pythonhosted.org/packages/86/8a/69176a64335aed183529207ba8bc3d329c2999d852b4f3818027203f50e6/opencv_python_headless-4.11.0.86-cp37-abi3-win_amd64.whl", hash = "sha256:6c304df9caa7a6a5710b91709dd4786bf20a74d57672b3c31f7033cc638174ca", size = 39402386, upload-time = "2025-01-16T13:52:56.418Z" },
 ]
 
 [[package]]
@@ -831,6 +830,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pygments"
+version = "2.19.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b0/77/a5b8c569bf593b0140bde72ea885a803b82086995367bf2037de0159d924/pygments-2.19.2.tar.gz", hash = "sha256:636cb2477cec7f8952536970bc533bc43743542f70392ae026374600add5b887", size = 4968631, upload-time = "2025-06-21T13:39:12.283Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c7/21/705964c7812476f378728bdf590ca4b771ec72385c533964653c68e86bdc/pygments-2.19.2-py3-none-any.whl", hash = "sha256:86540386c03d588bb81d44bc3928634ff26449851e99741617ecb9037ee5ec0b", size = 1225217, upload-time = "2025-06-21T13:39:07.939Z" },
+]
+
+[[package]]
 name = "pyparsing"
 version = "3.3.2"
 source = { registry = "https://pypi.org/simple" }
@@ -841,17 +849,18 @@ wheels = [
 
 [[package]]
 name = "pytest"
-version = "7.4.4"
+version = "9.0.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "colorama", marker = "sys_platform == 'win32'" },
     { name = "iniconfig" },
     { name = "packaging" },
     { name = "pluggy" },
+    { name = "pygments" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/80/1f/9d8e98e4133ffb16c90f3b405c43e38d3abb715bb5d7a63a5a684f7e46a3/pytest-7.4.4.tar.gz", hash = "sha256:2cf0005922c6ace4a3e2ec8b4080eb0d9753fdc93107415332f50ce9e7994280", size = 1357116, upload-time = "2023-12-31T12:00:18.035Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d1/db/7ef3487e0fb0049ddb5ce41d3a49c235bf9ad299b6a25d5780a89f19230f/pytest-9.0.2.tar.gz", hash = "sha256:75186651a92bd89611d1d9fc20f0b4345fd827c41ccd5c299a868a05d70edf11", size = 1568901, upload-time = "2025-12-06T21:30:51.014Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/51/ff/f6e8b8f39e08547faece4bd80f89d5a8de68a38b2d179cc1c4490ffa3286/pytest-7.4.4-py3-none-any.whl", hash = "sha256:b090cdf5ed60bf4c45261be03239c2c1c22df034fbffe691abe93cd80cea01d8", size = 325287, upload-time = "2023-12-31T12:00:13.963Z" },
+    { url = "https://files.pythonhosted.org/packages/3b/ab/b3226f0bd7cdcf710fbede2b3548584366da3b19b5021e74f5bde2a8fa3f/pytest-9.0.2-py3-none-any.whl", hash = "sha256:711ffd45bf766d5264d487b917733b453d917afd2b0ad65223959f59089f875b", size = 374801, upload-time = "2025-12-06T21:30:49.154Z" },
 ]
 
 [[package]]
