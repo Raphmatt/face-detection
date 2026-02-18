@@ -9,9 +9,8 @@ dependencies = [
     "dlib>=19.24.6",
     "fastapi>=0.129.0",
     "pillow>=12.1.1",
-    "pytest>=7.4.4",
     "uvicorn>=0.41.0",
-    "opencv-contrib-python-headless-rolling>=5.0.0.20221015",
+    "opencv-python-headless>=4.8.0",
     "python-multipart>=0.0.22",
     "numpy<2",
 ]
@@ -21,7 +20,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [dependency-groups]
-dev = ["pytest>=7.4.4"]
+dev = ["pytest>=9.0.0"]
 
 [tool.pyright]
 venvPath = "."
