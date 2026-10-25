@@ -115,6 +115,12 @@ This project uses pre-trained models from MediaPipe and dlib. The models are cur
 - **Documentation**: [MediaPipe Face Detector](https://ai.google.dev/edge/mediapipe/solutions/vision/face_detector#blazeface_short-range)
 - **Model Card**: [BlazeFace Model Card](https://storage.googleapis.com/mediapipe-assets/MediaPipe%20BlazeFace%20Model%20Card%20(Short%20Range).pdf)
 
+#### Face Landmarker
+
+- **Purpose**: 478-point 3D face landmarks and head pose estimation (used for face angle and gaze validation)
+- **Download**: [`face_landmarker.task`](https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task)
+- **Documentation**: [MediaPipe Face Landmarker](https://ai.google.dev/edge/mediapipe/solutions/vision/face_landmarker)
+
 #### Pose Landmarker (Lite)
 
 - **Purpose**: Human pose detection and 33-point 3D landmark estimation
@@ -150,6 +156,7 @@ This project uses pre-trained models from MediaPipe and dlib. The models are cur
 ```bash
 # Create model directories
 mkdir -p src/models/mp_models/face_detection
+mkdir -p src/models/mp_models/face_landmarker
 mkdir -p src/models/mp_models/pose_detection
 mkdir -p src/models/mp_models/segmentation
 mkdir -p src/models/dlib_models
@@ -157,6 +164,10 @@ mkdir -p src/models/dlib_models
 # Download BlazeFace (Short-Range)
 curl -L "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/latest/blaze_face_short_range.tflite" \
   -o src/models/mp_models/face_detection/blaze_face_short_range.tflite
+
+# Download Face Landmarker
+curl -L "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task" \
+  -o src/models/mp_models/face_landmarker/face_landmarker.task
 
 # Download Pose Landmarker (Lite)
 curl -L "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task" \
